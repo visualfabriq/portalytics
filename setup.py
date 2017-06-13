@@ -75,9 +75,8 @@ install_requires = [
     'scikit-learn==0.18',
     'statsmodels==0.6.1',
     'ipython>=5.1.0',
-    'matplotlib==1.5.3',
     'jupyter==1.0.0',
-    'seaborn==0.7.1'
+    'bokeh==0.12.6'
 ]
 setup_requires = []
 tests_requires = []

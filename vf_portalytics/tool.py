@@ -3,9 +3,6 @@ import numpy as np
 import os
 import shutil
 from sklearn.metrics import mean_absolute_error, r2_score
-import seaborn as sns
-import pylab as plt
-sns.set()
 
 
 def rm_file_or_dir(path):
@@ -57,27 +54,3 @@ def score_model(predict_lift, test_lift, baseline=None):
     if baseline is not None:
         print("Forecast error:" + str(forecast_error(predict_lift, test_lift, baseline)))
 
-
-def plot_feature_importance(regressor, train_df):
-    sns.set(style="ticks")
-
-    # Plot feature importance
-    feature_importance = regressor.feature_importances_
-
-    # make importances relative to max importance
-    feature_importance = 100.0 * (feature_importance / feature_importance.max())
-    mask = feature_importance > 0.5
-
-    feature_importance = feature_importance[mask]
-    sorted_idx = np.argsort(feature_importance)
-    pos = np.arange(sorted_idx.shape[0]) + .5
-
-    plt.figure(figsize=(18, 14), dpi=1000)
-    plt.barh(pos, feature_importance[sorted_idx], align='center', color='#3FB265')
-
-    plt.yticks(pos, train_df.columns[mask][sorted_idx], size=20)
-    plt.xticks(size=20)
-    plt.xlabel('Relative Importance', fontsize=20)
-
-    sns.despine()
-    plt.show()
