@@ -83,7 +83,7 @@ class DataSet(object):
             self.data_df = data_df
             self._save_data()
 
-        type_dict, categorical_var_list, numerical_var_list = detect_vars_type(data_df)
+        type_dict, categorical_var_list, numerical_var_list = detect_vars_type(self.data_df)
 
         self.type_dict = type_dict
         self.categorical_var_list = categorical_var_list

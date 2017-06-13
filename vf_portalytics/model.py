@@ -12,10 +12,12 @@ class PredictionModel(object):
         if id is None:
             raise ValueError('Model Id cannot be None')
 
+        self.id = id
+
         # filepaths
         self.path = path or '/srv/model'
-        self.meta_path = os.path.join(self.path, str(self.model_id) + '.meta')
-        self.model_path = os.path.join(self.path, str(self.model_id) + '.pkl')
+        self.meta_path = os.path.join(self.path, str(self.id) + '.meta')
+        self.model_path = os.path.join(self.path, str(self.id) + '.pkl')
 
         # try to load metadata
         self._load_metadata()
@@ -71,7 +73,7 @@ class PredictionModel(object):
     def predict(self, df):
         df = df.copy()
 
-        self._pre_processing(df)
+        self.pre_processing(df)
         if self.target_column in df.columns:
             del df[self.target_column]
 
@@ -86,7 +88,7 @@ class PredictionModel(object):
         self._post_processing(df)
         return df[self.target_column]
 
-    def _pre_processing(self, df, create_label_encoding=False, remove_nan=False):
+    def pre_processing(self, df, create_label_encoding=False, remove_nan=False):
         self.create_label_encoding = create_label_encoding
         df = df[sorted(list(set([x for x in self.features.keys() + self.target.keys()
                                  if x in df.columns])))]
