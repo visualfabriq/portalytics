@@ -1,9 +1,7 @@
 import os
+from pandas.api.types import is_numeric_dtype
 import pandas as pd
-from pandas.core.common import is_numeric_dtype
-from bcolz import ctable
 import collections
-import tarfile
 from vf_portalytics.tool import rm_file_or_dir
 
 
@@ -72,8 +70,10 @@ class DataSet(object):
 
         self.id = id
         self.path = path or '/srv/datasets/'
-        self.file_path = os.path.join(self.path, 'dataset_' + str(id) + '.bcolz')
-        self.package_path = os.path.join(self.path, 'dataset_' + str(id) + '.pck')
+        if not os.path.exists(self.path):
+            raise KeyError('Path ' + self.path + ' does not exist')
+
+        self.file_path = os.path.join(self.path, 'dataset_' + str(id) + '.msgpack')
 
         if data_df is None:
             # load data from disk
@@ -93,34 +93,14 @@ class DataSet(object):
         return self.id
 
     def _load_data(self):
-        # check if we do not have the file yet, but we do have a package
-        if not os.path.exists(self.file_path) and os.path.exists(self.package_path):
-            self.unpackage()
-
-        # now load the table
-        try:
-            self.ct = ctable(rootdir=self.file_path, mode='r')
-        except:
-            raise KeyError('No correct bcolz file was found at ' + self.file_path)
-
-        self.data_df = self.ct.to_dataframe()
+        self.data_df = pd.read_msgpack(self.file_path)
 
     def _save_data(self):
-        self.ct = ctable.fromdataframe(self.data_df, rootdir=self.file_path, mode='w')
-        self.ct.flush()
+        self.data_df.to_msgpack(self.file_path)
 
     def delete(self):
         rm_file_or_dir(self.file_path)
-        rm_file_or_dir(self.package_path)
 
     def save(self):
         self.save_data()
 
-    def package(self):
-        with tarfile.open(self.package_path, 'w') as tar:
-            tar.add(self.file_path, arcname=self.path)
-
-    def unpackage(self):
-        with tarfile.open(self.package_path) as tar:
-            tar.extractall(self.file_path)
-        rm_file_or_dir(self.package_path)
