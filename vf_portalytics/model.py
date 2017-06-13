@@ -37,7 +37,7 @@ class PredictionModel(object):
         self.target = model_data.get('target', None)
         self.features = model_data.get('features', {})
         self.labels = model_data.get('labels', {})
-        self.encoding_index = model_data.get('labels', 0)
+        self.encoding_index = model_data.get('encoding_index', 0)
 
     def _save_metadata(self):
         model_data = {'features': self.features,
