@@ -102,5 +102,5 @@ class DataSet(object):
         rm_file_or_dir(self.file_path)
 
     def save(self):
-        self.save_data()
+        self._save_data()
 
