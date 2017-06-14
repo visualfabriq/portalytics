@@ -3,6 +3,11 @@ Release notes for vf_portalytics
 ========================
 
 
+Changes from 0.1.1 to 0.1.2
+=======================
+
+- Fixed MANIFEST.in for real
+
 Changes from 0.1.0 to 0.1.1
 =======================
 
