@@ -19,7 +19,7 @@ def rm_file_or_dir(path):
                 os.remove(path)
 
 
-def describe_columns(df):
+def describe_columns(df, output=True):
     generic = []
     tag = []
     promotion_dimension = []
@@ -47,30 +47,33 @@ def describe_columns(df):
         else:
             generic.append(col)
 
-    if generic:
-        print('\nStandard Columns: ')
-        print(', '.join(generic))
-    if field:
-        print('\nPromotion Fields: ')
-        print(', '.join(field))
-    if tag:
-        print('\nTags: ')
-        print(', '.join(tag))
-    if promotion_dimension:
-        print('\nPromotion Dimensions: ')
-        print(', '.join(promotion_dimension))
-    if product:
-        print('\nProduct Attributes: ')
-        print(', '.join(product))
-    if product_dimension:
-        print('\nProduct Dimensions: ')
-        print(', '.join(product_dimension))
-    if media:
-        print('\nUsed Media: ')
-        print(', '.join(media))
-    if media_attr:
-        print('\nMedia Attributes: ')
-        print(', '.join(media_attr))
+    if output:
+        if generic:
+            print('\nStandard Columns: ')
+            print(', '.join(generic))
+        if field:
+            print('\nPromotion Fields: ')
+            print(', '.join(field))
+        if tag:
+            print('\nTags: ')
+            print(', '.join(tag))
+        if promotion_dimension:
+            print('\nPromotion Dimensions: ')
+            print(', '.join(promotion_dimension))
+        if product:
+            print('\nProduct Attributes: ')
+            print(', '.join(product))
+        if product_dimension:
+            print('\nProduct Dimensions: ')
+            print(', '.join(product_dimension))
+        if media:
+            print('\nUsed Media: ')
+            print(', '.join(media))
+        if media_attr:
+            print('\nMedia Attributes: ')
+            print(', '.join(media_attr))
+
+    return generic, field, tag, promotion_dimension, product_dimension, media, media_attr
 
 
 def create_train_test_sets(df, mask, prediction_model, prediction_target='lift', debug=True):
