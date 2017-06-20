@@ -15,7 +15,7 @@ Changes from 0.1.0 to 0.1.1
 
 Release  0.1.0
 =======================
-- Inital release
+- Initial release
 
 .. Local Variables:
 .. mode: rst
