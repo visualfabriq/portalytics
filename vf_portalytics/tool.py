@@ -93,11 +93,11 @@ def create_train_test_sets(df, mask, prediction_model, prediction_target='lift',
     return train_df, train_lift, test_df, test_lift
 
 
-def mean_absolute_percentage_error(y_true, y_pred):
+def mean_absolute_percentage_error(y_pred, y_true):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 
-def forecast_error(real_lift, predicted_lift, baseline_units):
+def forecast_error(predicted_lift, real_lift, baseline_units):
     predicted_units = baseline_units * predicted_lift
     real_units = baseline_units * real_lift
     error_units = abs(real_units - predicted_units)

@@ -73,14 +73,14 @@ class PredictionModel(object):
     def predict(self, df):
         df = df.copy()
 
-        self.pre_processing(df)
+        df = self.pre_processing(df)
         if self.target_column in df.columns:
             del df[self.target_column]
 
         filter_mask = (df[self.features.keys()].isnull().sum(axis=1) == 0)
         if filter_mask.any():
             predictions = self.model.predict(df[filter_mask])
-        else:
+        else:   
             predictions = [np.nan] * len(df)
 
         df[self.target_column] = np.nan
