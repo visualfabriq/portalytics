@@ -50,9 +50,6 @@ class PredictionModel(object):
     def _load_model(self):
         if os.path.exists(self.model_path):
             self.model = joblib.load(self.model_path)
-            # if compressed:
-            #     # unzip
-            #     joblib.dump(self.model, self.model_path(), compress=0)
         else:
             self.model = None
 
@@ -71,6 +68,9 @@ class PredictionModel(object):
         return self._pre_processing(df, create_label_encoding=False, remove_nan=True)
 
     def predict(self, df):
+        if self.model is None:
+            raise ValueError('No model is available for prediction')
+
         df = df.copy()
 
         df = self.pre_processing(df)
@@ -121,22 +121,14 @@ class PredictionModel(object):
         if transform == 'C':
             return self._label_encoding(column)
         elif transform == 'log':
-            return column.apply(np.log)
+            return np.log(column)
 
     @staticmethod
     def _back_transformation(transform, column):
         if transform == 'log':
-            return column.apply(np.exp)
-
-    def package_model(self):
-        pass
+            return np.exp(column)
 
     def delete(self):
         rm_file_or_dir(self.meta_path)
         rm_file_or_dir(self.model_path)
 
-    def enable_model(self):
-        pass
-        #     db.user_db.active_model_settings.remove()
-        #     db.user_db.active_model_settings.insert({'features': self.features, 'target': self.target,
-        #                                              'modelid': self.model_id, 'scikit_model': True})

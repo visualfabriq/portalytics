@@ -3,6 +3,12 @@ Release notes for vf_portalytics
 ========================
 
 
+Changes from 0.2.0 to 0.3.0
+=======================
+
+- Further extended notebook
+- Removed unused functions
+
 Changes from 0.1.2 to 0.2.0
 =======================
 
