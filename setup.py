@@ -58,7 +58,7 @@ except ImportError as e:
 lib_dirs = []
 libs = []
 def_macros = []
-sources = ['bquery/ctable_ext.pyx']
+sources = []
 
 cmdclass = {'build_ext': build_ext}
 
@@ -102,6 +102,7 @@ classifiers = [
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ]
 
 setup(
