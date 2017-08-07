@@ -19,7 +19,7 @@ from setuptools.command.build_ext import build_ext as _build_ext
 
 
 # Check this Python version is supported
-if any([v < (2, 6), (3,) < v < (3, 3)]):
+if any([v < (2, 7), (3,) < v < (3, 3)]):
     raise Exception("Unsupported Python version %d.%d. Requires Python >= 2.7 "
                     "or >= 3.3." % v[:2])
 
