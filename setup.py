@@ -62,21 +62,19 @@ sources = ['bquery/ctable_ext.pyx']
 
 cmdclass = {'build_ext': build_ext}
 
-optional_libs = ['numexpr>=1.4.1']
+optional_libs = []
 install_requires = [
     'pip>=8.1.2',
     'setuptools>=27.3',
-    'numpy==1.12.0',
-    'numexpr==2.6.1',
-    'bottleneck==1.2.0',
-    'pandas==0.19.2',
-    'patsy==0.4.1',
-    'scipy==0.18.1',
-    'scikit-learn==0.18',
+    'numpy>=1.12.0',
+    'numexpr>=2.6.1',
+    'bottleneck>=1.2.0',
+    'pandas>=0.19.2',
+    'scikit-learn==0.18.2',
     'statsmodels==0.6.1',
     'ipython>=5.1.0',
-    'jupyter==1.0.0',
-    'bokeh==0.12.6'
+    'jupyter>=1.0.0',
+    'bokeh>=0.12.6'
 ]
 setup_requires = []
 tests_requires = []
