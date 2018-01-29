@@ -2,6 +2,11 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.3.1 to 0.3.2
+=======================
+
+- Updated requirements
+
 
 Changes from 0.3.0 to 0.3.1
 =======================
