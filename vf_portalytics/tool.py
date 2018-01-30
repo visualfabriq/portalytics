@@ -82,7 +82,7 @@ def create_train_test_sets(df, mask, prediction_model, prediction_target='lift',
     train_lift = train_df[prediction_target]
     del train_df[prediction_target]
 
-    test_df = prediction_model.pre_processing(df[-mask], create_label_encoding=True, remove_nan=True)
+    test_df = prediction_model.pre_processing(df[~mask], create_label_encoding=True, remove_nan=True)
     test_lift = test_df[prediction_target]
     del test_df[prediction_target]
 
