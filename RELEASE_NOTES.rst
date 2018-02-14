@@ -2,6 +2,11 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.3.3 to 0.3.4
+=======================
+
+- Performance improvements for pre-processing (avoiding garbage collection and improved lookups)
+
 Changes from 0.3.2 to 0.3.3
 =======================
 

@@ -4,6 +4,18 @@ import os.path
 import os
 from vf_portalytics.tool import rm_file_or_dir
 import json
+import gc
+
+
+def _label_safe_value(input_val):
+    return unicode(input_val).replace('.', '')
+
+
+def _label_check(input_val, labels):
+    if input_val != input_val:
+        return -1
+    else:
+        return labels.get(_label_safe_value(input_val), -1)
 
 
 class PredictionModel(object):
@@ -25,7 +37,6 @@ class PredictionModel(object):
         self._load_model()
 
         self.target_column = self.target.keys()[0] if self.target else None
-        self.create_label_encoding = None
 
     def _load_metadata(self):
         if os.path.exists(self.meta_path):
@@ -62,10 +73,10 @@ class PredictionModel(object):
         self._save_model(compress_level=compress_level)
 
     def create_train_df(self, df):
-        return self._pre_processing(df, create_label_encoding=True, remove_nan=True)
+        return self.pre_processing(df, create_label_encoding=True, remove_nan=True)
 
     def create_test_df(self, df):
-        return self._pre_processing(df, create_label_encoding=False, remove_nan=True)
+        return self.pre_processing(df, create_label_encoding=False, remove_nan=True)
 
     def predict(self, df):
         if self.model is None:
@@ -77,10 +88,10 @@ class PredictionModel(object):
         if self.target_column in df.columns:
             del df[self.target_column]
 
-        filter_mask = (df[self.features.keys()].isnull().sum(axis=1) == 0)
+        filter_mask = ~(df.isnull().any(axis=1))
         if filter_mask.any():
             predictions = self.model.predict(df[filter_mask])
-        else:   
+        else:
             predictions = [np.nan] * len(df)
 
         df[self.target_column] = np.nan
@@ -89,16 +100,23 @@ class PredictionModel(object):
         return df[self.target_column]
 
     def pre_processing(self, df, create_label_encoding=False, remove_nan=False):
-        self.create_label_encoding = create_label_encoding
-        df = df[sorted(list(set([x for x in self.features.keys() + self.target.keys()
-                                 if x in df.columns])))]
-        for column, transforms in self.features.iteritems():
+
+        col_list = self.features.keys() + self.target.keys()
+        col_list = sorted(list(set([x for x in col_list if x in df.columns])))
+        df = df[col_list].copy()
+
+        for column, transforms in self.features.items():
             if not transforms:
                 continue
             for transform in transforms:
-                df[column] = self._transformation(transform, df[column])
+                if transform == 'C':
+                    df[column] = self._label_encoding(df[column], create_label_encoding=create_label_encoding)
+                elif transform == 'log':
+                    df[column] = np.log(df[column])
+                else:
+                    raise KeyError('Unknown transform option: ' + transform)
         if remove_nan:
-            df = df[df[self.features.keys()].isnull().sum(axis=1) == 0]
+            df = df[~(df.isnull().any(axis=1))]
 
         return df
 
@@ -107,28 +125,23 @@ class PredictionModel(object):
         for transform in transforms:
             df[self.target_column] = self._back_transformation(transform, df[self.target_column])
 
-    def _label_encoding(self, column):
-        if self.create_label_encoding:
-            for x in column.unique():
-                if unicode(x).replace('.', '') not in self.labels and x == x:
-                    self.labels[unicode(x).replace('.', '')] = self.encoding_index
+    def _label_encoding(self, input_ser, create_label_encoding=False):
+        if create_label_encoding:
+            for x in input_ser.unique():
+                if x != x:
+                    continue
+                x = _label_safe_value(x)
+                if x not in self.labels:
+                    self.labels[x] = self.encoding_index
                     self.encoding_index += 1
-
-        return column.apply(lambda y: self.labels[unicode(y).replace('.', '')]
-        if y == y and unicode(y).replace('.', '') in self.labels else -1)
-
-    def _transformation(self, transform, column):
-        if transform == 'C':
-            return self._label_encoding(column)
-        elif transform == 'log':
-            return np.log(column)
+        result = [_label_check(y, self.labels) for y in input_ser]
+        return np.array(result, dtype=np.int64)
 
     @staticmethod
-    def _back_transformation(transform, column):
+    def _back_transformation(transform, input_ser):
         if transform == 'log':
-            return np.exp(column)
+            return np.exp(input_ser)
 
     def delete(self):
         rm_file_or_dir(self.meta_path)
         rm_file_or_dir(self.model_path)
-
