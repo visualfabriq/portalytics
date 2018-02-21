@@ -74,7 +74,7 @@ install_requires = [
     'statsmodels==0.8.0',
     'ipython==5.5.0',
     'jupyter==1.0.0',
-    'bokeh==0.12.6'
+    'seaborn>=0.8.1'
 ]
 setup_requires = []
 tests_requires = []
