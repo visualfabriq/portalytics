@@ -2,6 +2,12 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.4.0 to 0.4.1
+=======================
+
+- Python 3 fixes
+
+
 Changes from 0.3.4 to 0.4.0
 =======================
 
