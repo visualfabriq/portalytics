@@ -8,7 +8,7 @@ import gc
 
 
 def _label_safe_value(input_val):
-    return unicode(input_val).replace('.', '')
+    return str(input_val).replace('.', '')
 
 
 def _label_check(input_val, labels):
