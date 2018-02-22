@@ -8,7 +8,7 @@ import gc
 
 
 def _label_safe_value(input_val):
-    return unicode(input_val).replace('.', '')
+    return str(input_val).replace('.', '')
 
 
 def _label_check(input_val, labels):
@@ -36,7 +36,7 @@ class PredictionModel(object):
         # try to load model
         self._load_model()
 
-        self.target_column = self.target.keys()[0] if self.target else None
+        self.target_column = list(self.target.keys())[0] if self.target else None
 
     def _load_metadata(self):
         if os.path.exists(self.meta_path):
@@ -101,7 +101,7 @@ class PredictionModel(object):
 
     def pre_processing(self, df, create_label_encoding=False, remove_nan=False):
 
-        col_list = self.features.keys() + self.target.keys()
+        col_list = list(self.features.keys()) + list(self.target.keys())
         col_list = sorted(list(set([x for x in col_list if x in df.columns])))
         df = df[col_list].copy()
 
@@ -121,7 +121,7 @@ class PredictionModel(object):
         return df
 
     def _post_processing(self, df):
-        transforms = self.target.values()[0]
+        transforms = list(self.target.values())[0]
         for transform in transforms:
             df[self.target_column] = self._back_transformation(transform, df[self.target_column])
 

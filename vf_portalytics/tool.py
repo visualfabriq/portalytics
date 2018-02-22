@@ -105,7 +105,7 @@ def forecast_error(predicted_lift, real_lift, baseline_units):
 
 
 def score_model(predict_lift, test_lift, baseline=None):
-    print(u"R²:" + str(r2_score(predict_lift, test_lift)))
+    print("R²:" + str(r2_score(predict_lift, test_lift)))
     print("MAE:" + str(mean_absolute_error(predict_lift, test_lift)))
     print("MAPE:" + str(mean_absolute_percentage_error(predict_lift, test_lift)))
     if baseline is not None:
