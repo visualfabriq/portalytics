@@ -71,6 +71,8 @@ install_requires = [
     'bottleneck==1.2.1',
     'pandas==0.22.0',
     'scikit-learn==0.19.1',
+    'xgboost==0.7.post4',
+    'lightgbm==2.1.0',
     'statsmodels==0.8.0',
     'ipython==5.5.0',
     'jupyter==1.0.0',
