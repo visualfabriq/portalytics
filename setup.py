@@ -64,12 +64,12 @@ cmdclass = {'build_ext': build_ext}
 
 optional_libs = []
 install_requires = [
-    'pip>=9.0.1',
+    'pip>=10.0.1',
     'setuptools>=38.4.0',
-    'numpy==1.14.0',
-    'numexpr==2.6.4',
-    'bottleneck==1.2.1',
-    'pandas==0.22.0',
+    'numpy>=1.14.4',
+    'numexpr>=2.6.5',
+    'bottleneck>=1.2.1',
+    'pandas>=0.23.1',
     'scikit-learn==0.19.1',
     'xgboost==0.7.post4',
     'lightgbm==2.1.0',

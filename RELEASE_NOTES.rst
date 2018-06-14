@@ -2,6 +2,12 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.4.3 to 0.4.4
+=======================
+
+- Library version update
+
+
 Changes from 0.4.2 to 0.4.3
 =======================
 
