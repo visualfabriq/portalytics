@@ -78,42 +78,34 @@ class PredictionModel(object):
         self._save_model(compress_level=compress_level)
 
     def create_train_df(self, df):
-        return self.pre_processing(df, create_label_encoding=True, remove_nan=True)
+        return self.pre_processing(df, train_mode=True)
 
     def create_test_df(self, df):
-        return self.pre_processing(df, create_label_encoding=False, remove_nan=True)
+        return self.pre_processing(df, train_mode=False)
 
     def predict(self, df):
         if self.model is None:
             raise ValueError('No model is available for prediction')
 
-        df = df.copy()
-
         df = self.pre_processing(df)
-        if self.target_column in df.columns:
-            del df[self.target_column]
 
-        filter_mask = ~(df.isnull().any(axis=1))
-        if filter_mask.any():
-            predictions = self.model.predict(df[filter_mask])
-        else:
-            predictions = [np.nan] * len(df)
+        prediction_df = self.model.predict(df)
+        prediction_df = self._post_processing(prediction_df)
 
-        df[self.target_column] = np.nan
-        df.loc[filter_mask, self.target_column] = predictions
-        self._post_processing(df)
-        return df[self.target_column]
+        return prediction_df
 
     def pre_processing(self, df, train_mode=False):
         # check the columns against the features and targets
         if not self.features:
             raise ValueError('No features defined')
-        elif not self.target:
-            raise ValueError('No targets defined')
 
-        col_list = list(self.features.keys()) + list(self.target.keys())
-        col_list = sorted(list(set([x for x in col_list if x in df.columns])))
-        df = df[col_list].copy()
+        col_list = sorted(list(self.features.keys())) + sorted(list(self.target.keys()))
+        if train_mode:
+            missing_columns = [x for x in self.features.keys() if x not in df]
+            if missing_columns:
+                raise KeyError('Missing features columns ' + ', '.join(missing_columns))
+
+        df = df[[x for x in col_list if x in df]].copy()
 
         # handle categorical features
         categorical_features = [col for col, transformations in self.features.items() if 'C' in transformations]
@@ -123,8 +115,7 @@ class PredictionModel(object):
                 # reset labels
                 self.labels = {}
 
-            if self.one_hot_encode:
-                output = [df]
+            output = [df]
 
             for col in categorical_features:
                 if train_mode:
@@ -133,10 +124,13 @@ class PredictionModel(object):
                     if len(self.labels[col]) <= 2:
                         raise Warning('Column ' + col + ' has not less then expected unique values for a categorical' +
                                       ' feature (' + ', '.join([str(x) for x in self.labels[col]]) + ')')
+                elif col not in df:
+                    # skip it if we're not training and it's missing
+                    continue
 
                 # apply label encoding
                 lookup = {x: i for i, x in enumerate(self.labels[col])}
-                missing = len(self.labels[col])
+                missing = len(lookup)
                 df[col] = df[col].apply(lambda x: lookup.get(x, missing))
 
                 if self.one_hot_encode:
@@ -159,10 +153,12 @@ class PredictionModel(object):
 
         # save the columns and order of columns
         if train_mode:
-            col_list = sorted(list(df.columns))
+            col_list = sorted([x for x in df.columns if x not in self.target])
             self.ordered_column_list = col_list
         else:
             col_list = self.ordered_column_list
+
+        col_list += sorted([x for x in self.target.keys() if x in df])
 
         if len(col_list) <= 2:
             raise ValueError('Model does not contains enough proper features and targets')
@@ -185,10 +181,11 @@ class PredictionModel(object):
 
         return df
 
-    def _post_processing(self, df):
+    def _post_processing(self, ser):
+        # todo: we currently do not support log/exp if we have multiple target columns
         for col, transforms in self.target.items():
             for transform in transforms:
-                df[col] = self._back_transformation(transform, df[self.target_column])
+                ser = self._back_transformation(transform, ser)
 
     @staticmethod
     def _back_transformation(transform, input_ser):
