@@ -19,9 +19,9 @@ from setuptools.command.build_ext import build_ext as _build_ext
 
 
 # Check this Python version is supported
-if any([v < (2, 7), (3,) < v < (3, 3)]):
+if any([v < (2, 7), (3,) < v < (3, 6)]):
     raise Exception("Unsupported Python version %d.%d. Requires Python >= 2.7 "
-                    "or >= 3.3." % v[:2])
+                    "or >= 3.6." % v[:2])
 
 
 class build_ext(_build_ext):
@@ -71,7 +71,7 @@ install_requires = [
     'bottleneck>=1.2.1',
     'pandas>=0.23.1',
     'scikit-learn==0.19.1',
-    'xgboost==0.7.post4',
+    'xgboost==0.72',
     'lightgbm==2.1.0',
     'statsmodels==0.8.0',
     'ipython==5.5.0',
@@ -101,11 +101,9 @@ classifiers = [
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-    ]
+        'Programming Language :: Python :: 3.7',
+]
 
 setup(
     name="vf_portalytics",

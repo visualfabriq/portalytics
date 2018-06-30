@@ -2,6 +2,14 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.4.4 to 0.5.0
+=======================
+
+- Automated One Hot Encoding for categorical features
+- Moved to minimum Python version 2.7 or 3.6
+- Library version update
+
+
 Changes from 0.4.3 to 0.4.4
 =======================
 
