@@ -2,6 +2,12 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.5.0 to 0.5.1
+=======================
+
+- Switched from warnings to console output with silent_mode option
+
+
 Changes from 0.4.4 to 0.5.0
 =======================
 
