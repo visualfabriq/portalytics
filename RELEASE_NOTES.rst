@@ -2,6 +2,12 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.5.2 to 0.5.3
+=======================
+
+- Explicit train_mode in pre_processing
+
+
 Changes from 0.5.1 to 0.5.2
 =======================
 

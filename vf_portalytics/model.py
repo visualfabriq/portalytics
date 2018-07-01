@@ -99,8 +99,9 @@ class PredictionModel(object):
         if not self.features:
             raise ValueError('No features defined')
 
-        col_list = sorted(list(self.features.keys())) + sorted(list(self.target.keys()))
+        col_list = sorted(list(self.features.keys()))
         if train_mode:
+            col_list += sorted(list(self.target.keys()))
             missing_columns = [x for x in self.features.keys() if x not in df]
             if missing_columns:
                 raise KeyError('Missing features columns ' + ', '.join(missing_columns))
@@ -158,7 +159,8 @@ class PredictionModel(object):
         else:
             col_list = self.ordered_column_list
 
-        col_list += sorted([x for x in self.target.keys() if x in df])
+        if train_mode:
+            col_list += sorted([x for x in self.target.keys() if x in df])
 
         if len(col_list) <= 2:
             raise ValueError('Model does not contains enough proper features and targets')
