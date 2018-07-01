@@ -2,6 +2,12 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.5.1 to 0.5.2
+=======================
+
+- Updated train test sets
+
+
 Changes from 0.5.0 to 0.5.1
 =======================
 

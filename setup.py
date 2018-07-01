@@ -66,14 +66,14 @@ optional_libs = []
 install_requires = [
     'pip>=10.0.1',
     'setuptools>=38.4.0',
-    'numpy>=1.14.4',
+    'numpy>=1.14.5',
     'numexpr>=2.6.5',
     'bottleneck>=1.2.1',
     'pandas>=0.23.1',
     'scikit-learn==0.19.1',
     'xgboost==0.72',
     'lightgbm==2.1.0',
-    'statsmodels==0.8.0',
+    'statsmodels==0.9.0',
     'ipython==5.5.0',
     'jupyter==1.0.0',
     'seaborn>=0.8.1'
