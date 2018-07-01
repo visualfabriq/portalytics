@@ -78,13 +78,15 @@ def describe_columns(df, output=True):
 
 def create_train_test_sets(df, mask, prediction_model, prediction_target='lift', debug=True):
     # convert
-    train_df = prediction_model.pre_processing(df[mask], train_mode=True)
+    train_df = df[mask]
     train_lift = train_df[prediction_target]
     del train_df[prediction_target]
+    train_df = prediction_model.pre_processing(train_df , train_mode=True)
 
-    test_df = prediction_model.pre_processing(df[~mask], train_mode=False)
+    test_df = df[~mask]
     test_lift = test_df[prediction_target]
     del test_df[prediction_target]
+    test_df = prediction_model.pre_processing(test_df, train_mode=False)
 
     if debug:
         print('Train set: ' + str(len(train_df)))
