@@ -94,7 +94,7 @@ class PredictionModel(object):
 
         return prediction_df
 
-    def pre_processing(self, df, train_mode=False):
+    def pre_processing(self, df, train_mode=False, silent_mode=False):
         # check the columns against the features and targets
         if not self.features:
             raise ValueError('No features defined')
@@ -121,9 +121,9 @@ class PredictionModel(object):
                 if train_mode:
                     # refresh label encoding for this column
                     self.labels[col] = list(df[col].value_counts().index)  # sorted label based on counts
-                    if len(self.labels[col]) <= 2:
-                        raise Warning('Column ' + col + ' has not less then expected unique values for a categorical' +
-                                      ' feature (' + ', '.join([str(x) for x in self.labels[col]]) + ')')
+                    if not silent_mode and len(self.labels[col]) <= 2:
+                        print('Column ' + col + ' has less then expected unique values for a categorical ' +
+                              'feature (' + ', '.join([str(x) for x in self.labels[col]]) + ')')
                 elif col not in df:
                     # skip it if we're not training and it's missing
                     continue
