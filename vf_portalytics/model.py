@@ -101,7 +101,6 @@ class PredictionModel(object):
 
         col_list = sorted(list(self.features.keys()))
         if train_mode:
-            col_list += sorted(list(self.target.keys()))
             missing_columns = [x for x in self.features.keys() if x not in df]
             if missing_columns:
                 raise KeyError('Missing features columns ' + ', '.join(missing_columns))
