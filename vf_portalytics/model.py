@@ -187,6 +187,7 @@ class PredictionModel(object):
         for col, transforms in self.target.items():
             for transform in transforms:
                 ser = self._back_transformation(transform, ser)
+        return ser
 
     @staticmethod
     def _back_transformation(transform, input_ser):

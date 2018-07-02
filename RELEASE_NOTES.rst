@@ -2,6 +2,12 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.5.3 to 0.5.4
+=======================
+
+- Resolve post processing bug
+
+
 Changes from 0.5.2 to 0.5.3
 =======================
 
