@@ -3,10 +3,16 @@ Release notes for vf_portalytics
 ========================
 
 
+Changes from 0.5.5 to 0.5.6
+=======================
+
+- Library updates
+
+
 Changes from 0.5.4 to 0.5.5
 =======================
 
-- Always only keep features
+- Always only keep features that are relevant without the target
 
 
 Changes from 0.5.3 to 0.5.4

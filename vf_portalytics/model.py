@@ -126,6 +126,8 @@ class PredictionModel(object):
                               'feature (' + ', '.join([str(x) for x in self.labels[col]]) + ')')
                 elif col not in df:
                     # skip it if we're not training and it's missing
+                    if not silent_mode:
+                        print('Missing categorical feature: ' + col)
                     continue
 
                 # apply label encoding
