@@ -160,10 +160,8 @@ class PredictionModel(object):
         else:
             col_list = self.ordered_column_list
 
-        if train_mode:
-            col_list += sorted([x for x in self.target.keys() if x in df])
-            if len(col_list) <= 2:
-                raise ValueError('Model does not contains enough proper features and targets')
+        if train_mode and not col_list:
+                raise ValueError('Model does not contains enough proper features')
 
         # check the availability of all columns
         for col in col_list:
