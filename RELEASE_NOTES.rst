@@ -2,6 +2,9 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.5.7 to 0.6.0
+=======================
+- Move to Python 3
 
 Changes from 0.5.6 to 0.5.7
 =======================

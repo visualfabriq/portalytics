@@ -19,9 +19,8 @@ from setuptools.command.build_ext import build_ext as _build_ext
 
 
 # Check this Python version is supported
-if any([v < (2, 7), (3,) < v < (3, 6)]):
-    raise Exception("Unsupported Python version %d.%d. Requires Python >= 2.7 "
-                    "or >= 3.6." % v[:2])
+if any([v < (3, 6)]):
+    raise Exception("Unsupported Python version %d.%d. Requires Python >= 3.6." % v[:2])
 
 
 class build_ext(_build_ext):
@@ -64,19 +63,19 @@ cmdclass = {'build_ext': build_ext}
 
 optional_libs = []
 install_requires = [
-    'pip>=10.0.1',
-    'setuptools>=38.4.0',
-    'numpy>=1.14.5',
-    'numexpr>=2.6.5',
+    'pip>=19.3.1',
+    'setuptools>=41.6.0',
+    'numpy>=1.17.3',
+    'numexpr>=2.7.0',
     'bottleneck>=1.2.1',
-    'pandas>=0.23.1',
-    'scikit-learn==0.19.1',
-    'xgboost==0.72.1',
-    'lightgbm==2.1.0',
-    'statsmodels==0.9.0',
-    'ipython==5.5.0',
-    'jupyter==1.0.0',
-    'seaborn>=0.8.1'
+    'pandas>=0.25.2',
+    'scikit-learn==0.21.3',
+    'xgboost==0.90',
+    'lightgbm==2.3.0',
+    'statsmodels==0.10.1',
+    'ipython>=7.9.0',
+    'jupyterlab>=1.1.4',
+    'seaborn>=0.9.0'
 ]
 setup_requires = []
 tests_requires = []
@@ -98,8 +97,6 @@ classifiers = [
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: Unix',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
@@ -110,6 +107,7 @@ setup(
     version=get_version(),
     description='A portable analytics framework for Python',
     long_description=read("README.md"),
+    long_description_content_type='text/markdown',
     classifiers=classifiers,
     author='Carst Vaartjes',
     author_email='cvaartjes@visualfabriq.com',
