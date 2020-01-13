@@ -76,13 +76,13 @@ tests_requires = []
 
 if v < (3,):
     tests_requires.extend(['unittest2', 'mock'])
-    install_requires.extend(['numpy<=1.16.*'])
-    install_requires.extend(['scipy<=1.2.2'])
-    install_requires.extend(['matplotlib<=2.2.4'])
-    install_requires.extend(['pandas<=0.23.4'])
-    install_requires.extend(['scikit-learn<=0.20.4'])
-    install_requires.extend(['xgboost<=0.82'])
-    install_requires.extend(['ipython<=5.8.0'])
+    install_requires.extend(['numpy==1.16.6'])
+    install_requires.extend(['scipy==1.2.2'])
+    install_requires.extend(['matplotlib==2.2.4'])
+    install_requires.extend(['pandas==0.23.4'])
+    install_requires.extend(['scikit-learn==0.20.4'])
+    install_requires.extend(['xgboost==0.82'])
+    install_requires.extend(['ipython==5.8.0'])
 else:
     install_requires.extend(['numpy>=1.18.1'])
     install_requires.extend(['scipy>=1.4.1'])
