@@ -19,8 +19,9 @@ from setuptools.command.build_ext import build_ext as _build_ext
 
 
 # Check this Python version is supported
-if any([v < (3, 6)]):
-    raise Exception("Unsupported Python version %d.%d. Requires Python >= 3.6." % v[:2])
+if any([v < (2, 6), (3,) < v < (3, 6)]):
+    raise Exception("Unsupported Python version %d.%d. Requires Python >= 2.7 "
+                    "or >= 3.6." % v[:2])
 
 
 class build_ext(_build_ext):
@@ -65,25 +66,32 @@ optional_libs = []
 install_requires = [
     'pip>=19.3.1',
     'setuptools>=41.6.0',
-    'numpy>=1.17.3',
     'numexpr>=2.7.0',
-    'bottleneck>=1.2.1',
-    'pandas>=0.25.2',
-    'scikit-learn==0.21.3',
-    'xgboost==0.90',
-    'lightgbm==2.3.0',
     'statsmodels==0.10.1',
-    'ipython>=7.9.0',
-    'jupyterlab>=1.1.4',
     'seaborn>=0.9.0'
 ]
+
 setup_requires = []
 tests_requires = []
+
 if v < (3,):
     tests_requires.extend(['unittest2', 'mock'])
+    install_requires.extend(['numpy<=1.16.*'])
+    install_requires.extend(['scipy<=1.2.2'])
+    install_requires.extend(['matplotlib<=2.2.4'])
+    install_requires.extend(['pandas<=0.23.4'])
+    install_requires.extend(['scikit-learn<=0.20.4'])
+    install_requires.extend(['xgboost<=0.82'])
+    install_requires.extend(['ipython<=5.8.0'])
+else:
+    install_requires.extend(['numpy>=1.18.1'])
+    install_requires.extend(['scipy>=1.4.1'])
+    install_requires.extend(['pandas>=0.25.3'])
+    install_requires.extend(['scikit-learn>=0.22.1'])
+    install_requires.extend(['xgboost>=0.90'])
 
-extras_requires = [
-]
+
+extras_requires = []
 ext_modules = []
 
 package_data = {'vf_portalytics': []}
