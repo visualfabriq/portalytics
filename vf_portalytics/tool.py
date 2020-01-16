@@ -112,3 +112,15 @@ def score_model(predict_lift, test_lift, baseline=None):
     print("MAPE:" + str(mean_absolute_percentage_error(predict_lift, test_lift)))
     if baseline is not None:
         print("Forecast error:" + str(forecast_error(predict_lift, test_lift, baseline)))
+
+
+def squared_error_objective_with_weighting(y_pred, y_true, under_predict_weight=1.0, over_predict_weight=1.0):
+    """
+    Return Gradient and Hessian of Mean Squared error objective function with different weights for under and
+    overshooting the target.
+    """
+    grad = y_true - y_pred
+
+    grad = np.where(grad > 0, grad * under_predict_weight, grad * over_predict_weight)
+    hess = np.full(y_true.shape, 1.0)
+    return grad, hess
