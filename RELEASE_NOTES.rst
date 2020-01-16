@@ -2,6 +2,12 @@
 Release notes for vf_portalytics
 ========================
 
+Changes from 0.6.1 to 0.6.2
+===========================
+
+- Add Custom Objective Function for XGBoost with different weights for
+    underpredict and overpredict cases.
+
 Changes from 0.6.0 to 0.6.1
 =======================
 - Use exact versions for Python 2.7
