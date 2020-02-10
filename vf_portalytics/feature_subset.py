@@ -3,7 +3,7 @@ from copy import deepcopy
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 
 
-class MyTransformer(TransformerMixin, BaseEstimator):
+class FeatureSubsetTransform(BaseEstimator, TransformerMixin):
 
     def __init__(self, group_cols=None, transformer=None):
         """Build a feature tranformer"""
