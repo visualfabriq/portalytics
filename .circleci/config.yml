@@ -5,7 +5,7 @@ jobs:
       - image: circleci/python:2.7
 
     steps:
-      - checkout:
+      - checkout
       - run:
           name: Install Requirements
           command: sudo pip install -r requirements.txt
@@ -22,7 +22,7 @@ jobs:
 
     working_directory:
     steps:
-      - checkout:
+      - checkout
       - run:
           name: Install Requirements
           command: sudo pip install -r requirements.txt
