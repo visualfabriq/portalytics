@@ -11,7 +11,7 @@ jobs:
           command: sudo pip install -r requirements.txt
       - run:
           name: Install Module
-          command: python setup.py build --inplace && sudo python setup.py install
+          command: sudo python setup.py build && sudo python setup.py install
       - run:
           name: Run Tests
           command: pytest -vs tests/
@@ -28,7 +28,7 @@ jobs:
           command: sudo pip install -r requirements.txt
       - run:
           name: Install Module
-          command: python setup.py build --inplace && sudo python setup.py install
+          command: sudo python setup.py build && sudo python setup.py install
       - run:
           name: Run Tests
           command: pytest -vs tests/
