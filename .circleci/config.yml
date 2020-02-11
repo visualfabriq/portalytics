@@ -1,0 +1,53 @@
+version: 2.1
+jobs:
+  build27:
+    docker:
+      - image: circleci/python:2.7
+
+    steps:
+      - checkout:
+      - run:
+          name: Install Requirements
+          command: sudo pip install -r requirements.txt
+      - run:
+          name: Install Module
+          command: python setup.py build --inplace && sudo python setup.py install
+      - run:
+          name: Run Tests
+          command: pytest -vs tests/
+
+  build3:
+    docker:
+      - image: circleci/python:3.7
+
+    working_directory:
+    steps:
+      - checkout:
+      - run:
+          name: Install Requirements
+          command: sudo pip install -r requirements.txt
+      - run:
+          name: Install Module
+          command: python setup.py build --inplace && sudo python setup.py install
+      - run:
+          name: Run Tests
+          command: pytest -vs tests/
+
+workflows:
+  version: 2.1
+  build-and-test:
+    jobs:
+      - build27
+      - build3
+
+  daily:
+    triggers:
+      - schedule:
+          cron: "0 10 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build27
+      - build3
