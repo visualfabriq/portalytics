@@ -53,8 +53,14 @@ workflows:
 
   build-and-release:
     jobs:
-      - build27
-      - build3
+      - build27:
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+      - build3:
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
       - pypi_release:
           requires:
             - build27
