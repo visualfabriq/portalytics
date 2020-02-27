@@ -71,7 +71,7 @@ class FeatureSubsetModel(BaseEstimator, RegressorMixin):
         """
         # create a new collumn by checking the lookup_dict
         X['predicted_market_volume'] = [self.lookup_dict.get((week, pr), 0)
-                                        for week, pr in [*zip(X['yearweek'], X['original_product_dimension_44'])]]
+                                        for week, pr in zip(X['yearweek'], X['original_product_dimension_44'])]
         groups = X.groupby(by=list(self.group_cols))
         results = []
 
