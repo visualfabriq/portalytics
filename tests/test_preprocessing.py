@@ -41,6 +41,7 @@ def test_prediction_model_categorical_features(tmpdir):
         name='y_pred',
         index=y_test.index
     )
+
     # Use sklearn that keeps the order of the categorical feature as it is (A< B < C)
     le = preprocessing.LabelEncoder()
     x_train['feature_1'] = le.fit_transform(x_train['feature_1'])

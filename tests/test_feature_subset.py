@@ -1,5 +1,9 @@
 import pandas as pd
 from pandas.util.testing import assert_series_equal
+from numpy.random import randint
+import itertools
+from operator import itemgetter
+import numpy as np
 
 import pytest
 
@@ -9,12 +13,13 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import PolynomialFeatures
+import random
 
 from vf_portalytics.feature_subset import FeatureSubsetModel, FeatureSubsetTransform
 from vf_portalytics.model import PredictionModel
 
 
-def make_dataset(random_state, n_informative, **kwargs):
+def make_dataset(random_state, n_informative, collumn_names, **kwargs):
     x, y = make_regression(
 
         n_samples=1000,
@@ -25,27 +30,44 @@ def make_dataset(random_state, n_informative, **kwargs):
         random_state=random_state
     )
     x = pd.DataFrame(x)
-    x.columns = ['feature_{}'.format(n) for n in x.columns]
+    x.columns = [name for name in collumn_names]
     x = x.assign(**kwargs)
-
+    x['yearweek'] = randint(1, 54, len(x))
+    # pack_type (original_product_dimension_44) 0: 'Can', 1: 'Bottle'
+    x['original_product_dimension_44'] = [random.choice([0, 1]) for i in range(len(x))]
     return x, pd.Series(y)
 
-def test_feauture_subset_model():
 
-    # Create data
-    x1, y1 = make_dataset(1, 5, account_banner='A', product_desc='X')
-    x2, y2 = make_dataset(2, 3, account_banner='B', product_desc='Y')
+def make_dict():
+    """Creates a dictionary with keys all the combinations between the weeks of the year and the pack types
+    In this case we have only one pack type, in order to check if when we dont have the pack type in the dict,
+    the model will predict 0.
+    """
+    all_list = [list(range(1, 54)), [0]]
+    keys = list(itertools.product(*all_list))
+    values = [random.choice(np.linspace(-2.5, 2.5, num=500)) for i in range(len(keys))]
+    return dict(zip(keys, values))
+
+def test_feauture_subset_model():
+    collumn_names = ['promoted_price', 'consumer_length',
+                     'yearweek', 'original_product_dimension_44', 'product_volume_per_sku']
+
+    x1, y1 = make_dataset(1, 5, collumn_names, account_banner='A', product_desc='X')
+    x2, y2 = make_dataset(2, 3, collumn_names, account_banner='B', product_desc='Y')
+    # create on more that will not have sub_model and will predict 0
+    x3, y3 = make_dataset(3, 1, collumn_names, account_banner='C', product_desc='Z')
 
     # combine into one dataset
-    total_x = pd.concat([x1, x2], axis=0, ignore_index=True).reset_index(drop=True)
-    total_y = pd.concat([y1, y2], axis=0, ignore_index=True).reset_index(drop=True)
-
+    total_x = pd.concat([x1, x2, x3], axis=0, ignore_index=True).reset_index(drop=True)
+    total_y = pd.concat([y1, y2, y3], axis=0, ignore_index=True).reset_index(drop=True)
     # Split into train and test
     train_index, test_index = train_test_split(total_x.index, random_state=5)
     train_x, train_y = total_x.loc[train_index, :], total_y.loc[train_index]
     test_x, test_y = total_x.loc[test_index, :], total_y.loc[test_index]
 
-    model_wrapper = PredictionModel("my_test_model", path='/tmp', one_hot_encode=False)
+    # create dictionary "predicted_market_volumes" - "lookup_dict"
+    lookup_dict = make_dict()
+
     subset_cols = ('account_banner', 'product_desc')
     sub_models = {
         ('A', 'X'): LinearRegression(),
@@ -53,23 +75,26 @@ def test_feauture_subset_model():
     }
 
     pipeline = Pipeline([
-      ('transform', FeatureSubsetTransform(group_cols=subset_cols, transformer=PolynomialFeatures(2))),
-      ('estimate', FeatureSubsetModel(group_cols=subset_cols, sub_models=sub_models))
+        ('transform', FeatureSubsetTransform(group_cols=subset_cols, transformer=PolynomialFeatures(2))),
+        ('estimate', FeatureSubsetModel(lookup_dict=lookup_dict, group_cols=subset_cols, sub_models=sub_models))
     ])
 
+    # Note: must use one_hot_encode=False to prevent one-hot encoding of categorical features in input data
+    model_wrapper = PredictionModel("my_test_model", path='/tmp', one_hot_encode=False)
+
     model_wrapper.model = pipeline
+    # save feature names (no strictly since all the preprocessing is made being made in the pipeline)
     model_wrapper.features = {
         # Grouping features
         'account_banner': [],
         'product_desc': [],
         # other feaures
-        'feature_0': [],
-        'feature_1': [],
-        'feature_2': [],
-        'feature_3': [],
-        'feature_4': [],
+        'promoted_price': [],
+        'consumer_length': [],
+        'yearweek': [],
+        'original_product_dimension_44': [],
+        'product_volume_per_sku': [],
     }
-
     model_wrapper.target = {'target': []}
     model_wrapper.ordered_column_list = sorted(model_wrapper.features.keys())
     model_wrapper.model.fit(train_x, train_y)
@@ -77,7 +102,7 @@ def test_feauture_subset_model():
     predicted_y = model_wrapper.model.predict(test_x)
 
     model_wrapper.model = pipeline
-    _ = model_wrapper.model.fit(total_x, total_y)
+    _ = model_wrapper.model.fit(train_x, train_y)
     model_wrapper.save()
 
     # Load model and check if the properties are saved as well
