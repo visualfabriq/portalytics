@@ -12,7 +12,6 @@ from vf_portalytics.model import PredictionModel
 
 def test_prediction_model_categorical_features(tmpdir):
     # Needs to be fixed
-
     # Generate test data
     x, y = make_regression(n_samples=1000, n_features=5, n_informative=3, random_state=1234)
     feature_names = ['feature_{}'.format(n) for n in range(1, 6)]

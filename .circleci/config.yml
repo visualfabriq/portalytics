@@ -1,0 +1,84 @@
+version: 2.1
+jobs:
+  build27:
+    docker:
+      - image: circleci/python:2.7
+
+    steps:
+      - checkout
+      - run:
+          name: Install Requirements
+          command: sudo pip install -r requirements.txt
+      - run:
+          name: Install Module
+          command: sudo python setup.py build && sudo python setup.py install
+      - run:
+          name: Run Tests
+          command: pytest -vs tests/
+
+  build3:
+    docker:
+      - image: circleci/python:3.7
+
+    working_directory:
+    steps:
+      - checkout
+      - run:
+          name: Install Requirements
+          command: sudo pip install -r requirements.txt
+      - run:
+          name: Install Module
+          command: sudo python setup.py build && sudo python setup.py install
+      - run:
+          name: Run Tests
+          command: pytest -vs tests/
+
+  pypi_release:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run:
+          name: Install Twine
+          command: sudo pip install twine
+      - run:
+          name: Package Project
+          command: sudo python setup.py sdist bdist_wheel
+      - run:
+          name: Upload to Pypi
+          command: sudo twine upload -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*
+
+workflows:
+  version: 2.1
+
+  build-and-release:
+    jobs:
+      - build27:
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+      - build3:
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+      - pypi_release:
+          requires:
+            - build27
+            - build3
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
+
+  daily:
+    triggers:
+      - schedule:
+          cron: "0 10 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build27
+      - build3
