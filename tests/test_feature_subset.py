@@ -6,6 +6,7 @@ from operator import itemgetter
 import numpy as np
 
 import pytest
+import numpy.testing as npt
 
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
@@ -116,3 +117,10 @@ def test_feauture_subset_model():
     assert saved_model.ordered_column_list == model_wrapper.ordered_column_list
     assert saved_model.target == model_wrapper.target
     assert_series_equal(saved_model_predicted_y, predicted_y, check_less_precise=0)
+
+    # check totally new data
+    # create on more that will not have sub_model and will predict 0
+    x, y = make_dataset(3, 1, collumn_names, account_banner='EE', product_desc='QQ')
+    predicted_y = saved_model.model.predict(x)
+
+    npt.assert_almost_equal(predicted_y, [0] * len(predicted_y))
