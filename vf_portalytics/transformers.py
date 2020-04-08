@@ -1,4 +1,4 @@
-import models.grouped_model
+from vf_portalytics.tool import set_categorical_features
 
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -12,7 +12,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         # find automatically categorical features if they are not previously declared
         if self.categorical_features is None:
-            self.categorical_features = grouped_model.Grouped_Model.set_categorical_features(data=X, potential_cat_feat=None)
+            self.categorical_features = set_categorical_features(data=X, potential_cat_feat=None)
 
         # Check columns are in X
         for col in self.categorical_features:

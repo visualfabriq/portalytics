@@ -5,7 +5,8 @@ import copy
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.dummy import DummyClassifier
 
-import models.transformers
+from vf_portalytics.tool import set_categorical_features
+from vf_portalytics.transformers import OneHotEncoder, potential_transformers
 
 class Grouped_Model(BaseEstimator, RegressorMixin):
 
@@ -36,10 +37,9 @@ class Grouped_Model(BaseEstimator, RegressorMixin):
             x_group = group[self.selected_features[gp_key]]
             y_in = y.loc[x_group.index]
             # preprocessing
-            self.categorical_features[gp_key] = Grouped_Model.set_categorical_features(data=x_group,
-                                                                                       potential_cat_feat=self.params[
-                                                                                           gp_key].get(
-                                                                                           'potential_cat_feat', None))
+            self.categorical_features[gp_key] = set_categorical_features(data=x_group,
+                                                                         potential_cat_feat=self.params[gp_key].get(
+                                                                             'potential_cat_feat', None))
             gp_transformer = self.transformers.get(gp_key)
             gp_transformer.categorical_features = self.categorical_features[gp_key]
             gp_transformer.fit(x_group)
@@ -91,20 +91,3 @@ class Grouped_Model(BaseEstimator, RegressorMixin):
             transformer_name = self.params[gp_key].get('transformer', 'OneHotEncoder')
             transformers.update({gp_key: copy.deepcopy(transformers.potential_transformers).get(transformer_name)})
         return sub_models, transformers
-
-    @staticmethod
-    def set_categorical_features(data=None, potential_cat_feat=None):
-        # Declare categorical features for the transformer
-        # or leave the model find them automatically from the dataset.
-
-        if potential_cat_feat is None and isinstance(data, pd.DataFrame):
-            # declare automatically categorical features
-            potential_cat_feat = set(data.select_dtypes(include=['object']).columns)
-            potential_cat_feat.update([feat_name for feat_name, row in data.iteritems()
-                                       if 2 < len(row.unique()) < 30])
-        elif isinstance(potential_cat_feat, set):
-            potential_cat_feat = potential_cat_feat
-        else:
-            potential_cat_feat = None
-
-        return potential_cat_feat

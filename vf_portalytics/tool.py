@@ -3,7 +3,7 @@ import numpy as np
 import os
 import shutil
 from sklearn.metrics import mean_absolute_error, r2_score
-
+import pandas as pd
 
 def rm_file_or_dir(path):
     if os.path.exists(path):
@@ -124,3 +124,16 @@ def squared_error_objective_with_weighting(y_pred, y_true, under_predict_weight=
     grad = np.where(grad > 0, grad * under_predict_weight, grad * over_predict_weight)
     hess = np.full(y_true.shape, 1.0)
     return grad, hess
+
+
+def set_categorical_features(data=None, potential_cat_feat=None):
+    """
+    Declare categorical features for the transformer or leave the model find them automatically from the dataset.
+    """
+    if potential_cat_feat is None and isinstance(data, pd.DataFrame):
+        # declare automatically categorical features
+        potential_cat_feat = set(data.select_dtypes(include=['object']).columns)
+        potential_cat_feat.update([feat_name for feat_name, row in data.iteritems()
+                                   if 2 < len(row.unique()) < 30])
+
+    return potential_cat_feat
