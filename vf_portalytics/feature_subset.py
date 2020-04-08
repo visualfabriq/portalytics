@@ -76,8 +76,8 @@ class FeatureSubsetModel(BaseEstimator, RegressorMixin):
         results = []
 
         for gp_key, x_group in groups:
-            gp_model = self.sub_models.get(gp_key, DummyClassifier(constant=0))
             x_in = x_group.drop([n for n in self.group_cols], axis=1)
+            gp_model = self.sub_models.get(gp_key, DummyClassifier(constant=0).fit(x_in, [0]*len(x_in)))
 
             # predict market share only using price related data
             predicted_market_share = gp_model.predict(X=x_in[[col for col in x_in if col.startswith('promoted_price')]])
