@@ -1,10 +1,12 @@
-from vf_portalytics.tool import set_categorical_features
+from models.tool import set_categorical_features
 
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
 class OneHotEncoder(BaseEstimator, TransformerMixin):
-
+    """
+    Replaces categorical features with binary columns for each unique category
+    """
     def __init__(self, categorical_features=None):
         self.maps = dict()
         self.categorical_features = categorical_features
@@ -59,6 +61,41 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         return dummy_col
 
 
+class LabelEncoder(BaseEstimator, TransformerMixin):
+    """
+    Replaces categorical features with integers for each unique category
+    """
+
+    def __init__(self, categorical_features=None):
+        self.maps = dict()
+        self.categorical_features = categorical_features
+
+    def fit(self, X, y=None):
+        # find automatically categorical features if they are not previously declared
+        if self.categorical_features is None:
+            self.categorical_features = set_categorical_features(data=X, potential_cat_feat=None)
+
+        # Check columns are in X
+        for col in self.categorical_features:
+            if col not in X:
+                raise ValueError('Missing categorical feature: ' + col)
+
+        for col in self.categorical_features:
+            self.maps[col] = dict(zip(
+                X[col].values,
+                X[col].astype('category').cat.codes.values
+            ))
+        return self
+
+    def transform(self, X, y=None):
+        output = X.copy()
+        for col, value in self.maps.items():
+            # Map the column
+            output[col] = output[col].map(value)
+
+        return output
+
 potential_transformers = {
-    'OneHotEncoder': OneHotEncoder()
+    'OneHotEncoder': OneHotEncoder(),
+    'LabelEncoder': LabelEncoder()
                           }
