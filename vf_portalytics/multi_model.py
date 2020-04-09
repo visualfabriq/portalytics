@@ -8,7 +8,7 @@ from sklearn.dummy import DummyClassifier
 from vf_portalytics.tool import set_categorical_features
 from vf_portalytics.transformers import OneHotEncoder, potential_transformers
 
-class GroupedModel(BaseEstimator, RegressorMixin):
+class MultiModel(BaseEstimator, RegressorMixin):
 
     def __init__(self, group_col=None, clusters=None, params=None, selected_features=None):
         """

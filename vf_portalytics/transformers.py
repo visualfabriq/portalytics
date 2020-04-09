@@ -1,4 +1,4 @@
-from models.tool import set_categorical_features
+from vf_portalytics.tool import set_categorical_features
 
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -80,18 +80,21 @@ class LabelEncoder(BaseEstimator, TransformerMixin):
             if col not in X:
                 raise ValueError('Missing categorical feature: ' + col)
 
+        # Store each unique value for each cat feature
         for col in self.categorical_features:
-            self.maps[col] = dict(zip(
-                X[col].values,
-                X[col].astype('category').cat.codes.values
-            ))
+            uniques = X[col].unique()
+            self.maps[col] = [unique for unique in uniques]
+
         return self
 
     def transform(self, X, y=None):
         output = X.copy()
-        for col, value in self.maps.items():
-            # Map the column
-            output[col] = output[col].map(value)
+        for col, vals in self.maps.items():
+            # apply label encoding
+            lookup = {x: i for i, x in enumerate(vals)}
+            missing = len(lookup)
+            output.loc[:, col] = output.loc[:, col].apply(lambda x: lookup.get(x, missing))
+            output.loc[:, col] = output.loc[:, col].astype(int)
 
         return output
 
