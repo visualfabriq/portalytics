@@ -1,8 +1,7 @@
 import pandas as pd
 import xgboost
-import copy
 
-from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
+from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.dummy import DummyClassifier
 
 from vf_portalytics.tool import set_categorical_features
@@ -41,11 +40,19 @@ class MultiModel(BaseEstimator, RegressorMixin):
                                                                          potential_cat_feat=self.params[gp_key].get(
                                                                              'potential_cat_feat', None))
             gp_transformer = self.transformers.get(gp_key)
-            gp_transformer.cols = self.categorical_features[gp_key]
-            x_group = gp_transformer.fit_transform(x_group)
+            if gp_transformer:
+                gp_transformer.cols = self.categorical_features[gp_key]
+                x_group = gp_transformer.fit_transform(x_group, y_in)
 
-            # Find the sub-model for this group key and fit
-            gp_model = self.sub_models.get(gp_key, DummyClassifier(constant=0))
+            # Find the sub-model for this group key
+            try:
+                gp_model = self.sub_models[gp_key]
+            except KeyError:
+                print('There was no model initialized for category %s' % str(gp_key))
+                print('A Dummy Classifier was chosen')
+                gp_model = DummyClassifier(constant=0)
+
+            # fit
             gp_model = gp_model.fit(X=x_group, y=y_in.values)
 
             self.sub_models[gp_key] = gp_model
@@ -60,11 +67,21 @@ class MultiModel(BaseEstimator, RegressorMixin):
         groups = X.groupby(by=self.group_col)
         results = []
         for gp_key, group in groups:
-            x_group = group[self.selected_features[gp_key]]
-            gp_transformer = self.transformers[gp_key]
-            gp_model = self.sub_models.get(gp_key, DummyClassifier(constant=0).fit(x_group, [0] * len(x_group)))
+            x_group = group[self.selected_features.get(gp_key, group.columns)]
+
             # preprocessing
-            x_group = gp_transformer.transform(x_group)
+            gp_transformer = self.transformers.get(gp_key)
+            if gp_transformer:
+                x_group = gp_transformer.transform(x_group)
+
+            # Find the sub-model for this group key and fit
+            try:
+                gp_model = self.sub_models[gp_key]
+            except KeyError:
+                print('There was no model initialized for category %s' % str(gp_key))
+                print('A Dummy Classifier was chosen')
+                gp_model = DummyClassifier(constant=0).fit(x_group, [0] * len(x_group))
+
             # predict
             result = gp_model.predict(x_group)
             result = pd.Series(index=x_group.index, data=result)

@@ -1,20 +1,17 @@
-import pandas as pd
-from pandas.util.testing import assert_series_equal
-from numpy.random import randint
 import itertools
-from operator import itemgetter
+import random
+
 import numpy as np
-
-import pytest
 import numpy.testing as npt
-
+import pandas as pd
+from numpy.random import randint
+from pandas.util.testing import assert_series_equal
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
-from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import PolynomialFeatures
-import random
+from sklearn.tree import DecisionTreeRegressor
 
 from vf_portalytics.feature_subset import FeatureSubsetModel, FeatureSubsetTransform
 from vf_portalytics.model import PredictionModel

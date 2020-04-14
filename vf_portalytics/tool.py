@@ -136,4 +136,4 @@ def set_categorical_features(data=None, potential_cat_feat=None):
         potential_cat_feat.update([feat_name for feat_name, row in data.items()
                                    if 2 < len(row.unique()) < 30])
 
-    return potential_cat_feat
+    return set(potential_cat_feat)
