@@ -6,7 +6,7 @@ from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.dummy import DummyClassifier
 
 from vf_portalytics.tool import set_categorical_features
-from vf_portalytics.transformers import OneHotEncoder, potential_transformers
+from vf_portalytics.transformers import potential_transformers
 
 class MultiModel(BaseEstimator, RegressorMixin):
 
@@ -42,8 +42,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
                                                                              'potential_cat_feat', None))
             gp_transformer = self.transformers.get(gp_key)
             gp_transformer.categorical_features = self.categorical_features[gp_key]
-            gp_transformer.fit(x_group)
-            x_group = gp_transformer.transform(x_group)
+            x_group = gp_transformer.fit_transform(x_group)
 
             # Find the sub-model for this group key and fit
             gp_model = self.sub_models.get(gp_key, DummyClassifier(constant=0))

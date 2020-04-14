@@ -133,7 +133,7 @@ def set_categorical_features(data=None, potential_cat_feat=None):
     if potential_cat_feat is None and isinstance(data, pd.DataFrame):
         # declare automatically categorical features
         potential_cat_feat = set(data.select_dtypes(include=['object']).columns)
-        potential_cat_feat.update([feat_name for feat_name, row in data.iteritems()
+        potential_cat_feat.update([feat_name for feat_name, row in data.items()
                                    if 2 < len(row.unique()) < 30])
 
     return potential_cat_feat
