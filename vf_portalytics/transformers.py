@@ -1,14 +1,14 @@
 import category_encoders as ce
 
-types = {
+potential_transformers = {
         'OneHotEncoder': ce.OneHotEncoder,
         'OrdinalEncoder': ce.OrdinalEncoder,
         'TargetEncoder': ce.TargetEncoder
 }
 
-def potential_transformers(name):
+def get_transformer(name):
     try:
-        output = types[name]
+        output = potential_transformers[name]
         return output()
     except KeyError:
         print('KeyError: The "%s" is not a potential transformer' % str(name))
