@@ -1,10 +1,10 @@
 import pandas as pd
 import random
 
-from vf_portalytics.tool import set_categorical_features
+from vf_portalytics.tool import get_categorical_features
 
 
-def test_set_categorical_featuers():
+def test_get_categorical_featuers():
     data = {
         'Name': [random.choice(['Tom', 'nick', 'krish', 'jack']) for i in range(100)],
         'Age': [random.choice([20, 21, 19, 18]) for i in range(100)],
@@ -12,10 +12,10 @@ def test_set_categorical_featuers():
     }
     data = pd.DataFrame(data)
 
-    potential_cat_feat = set_categorical_features(data)
-    cat_feat = set(['Name', 'Age'])
-    assert cat_feat == potential_cat_feat
+    potential_cat_feat = get_categorical_features(data)
+    cat_feat = ['Name', 'Age']
+    assert set(cat_feat) == set(potential_cat_feat)
 
-    potential_cat_feat = set_categorical_features(data, potential_cat_feat=['Height'])
-    cat_feat = set(['Height'])
-    assert cat_feat == potential_cat_feat
+    potential_cat_feat = get_categorical_features(data, potential_cat_feat=['Height'])
+    cat_feat = ['Height']
+    assert set(cat_feat) == set(potential_cat_feat)

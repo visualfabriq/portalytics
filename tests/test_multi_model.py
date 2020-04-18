@@ -68,17 +68,24 @@ def test_multi_model():
     selected_features = {}
     for gp_key in clusters:
         selected_features[gp_key] = set(feature_col_list)
+    nominal_features = ['feature_0']
+    ordinal_features = ['feature_1']
 
     # imitate params given from hyper optimization tuning
     params = {
-        'A': {'transformer': 'OneHotEncoder'},
-        'B': {'transformer': 'OneHotEncoder'},
-        'C': {'transformer': 'OrdinalEncoder'},
-        'D': {'transformer': 'OrdinalEncoder'}
+        'A': {'transformer_nominal': 'TargetEncoder',
+              'transformer_ordinal': 'OrdinalEncoder'},
+        'B': {'transformer_nominal': 'TargetEncoder',
+              'transformer_ordinal': 'OrdinalEncoder'},
+        'C': {'transformer_nominal': 'TargetEncoder',
+              'transformer_ordinal': 'OrdinalEncoder'},
+        'D': {'transformer_nominal': 'TargetEncoder',
+              'transformer_ordinal': 'OrdinalEncoder'},
     }
 
     # Initiliaze model
-    model = MultiModel(group_col=cat_feature, clusters=clusters, params=params, selected_features=selected_features)
+    model = MultiModel(group_col=cat_feature, clusters=clusters, params=params,
+                       selected_features=selected_features, nominals=nominal_features, ordinals=ordinal_features)
     model.fit(train_x, train_y)
     pred_test_y = model.predict(test_x)
 

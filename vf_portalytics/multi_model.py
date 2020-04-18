@@ -4,12 +4,26 @@ import xgboost
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.dummy import DummyClassifier
 
-from vf_portalytics.tool import set_categorical_features
+from vf_portalytics.tool import get_categorical_features
 from vf_portalytics.transformers import get_transformer
+
+import pandas as pd
+import xgboost
+import copy
+from functools import partial
+
+from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
+from sklearn.dummy import DummyClassifier
+
+from vf_portalytics.tool import get_categorical_features
+from vf_portalytics.transformers import get_transformer
+
+from vf_portalytics.tool import squared_error_objective_with_weighting
 
 class MultiModel(BaseEstimator, RegressorMixin):
 
-    def __init__(self, group_col=None, clusters=None, params=None, selected_features=None):
+    def __init__(self, group_col=None, clusters=None, params=None,
+                 selected_features=None, nominals=None, ordinals=None):
         """
         Build a model for each subset of rows matching particular category of features group_col.
         Input:
@@ -21,8 +35,10 @@ class MultiModel(BaseEstimator, RegressorMixin):
         self.clusters = clusters
         self.params = params
         self.selected_features = selected_features
+        self.nominals = nominals
+        self.ordinals = ordinals
         self.categorical_features = dict()
-        self.sub_models, self.transformers = self.initiliaze_models()
+        self.sub_models, self.transformers_nominals, self.transformers_ordinals = self.initiliaze_models()
 
     def fit(self, X, y=None):
         """
@@ -36,13 +52,22 @@ class MultiModel(BaseEstimator, RegressorMixin):
             x_group = group[self.selected_features[gp_key]]
             y_in = y.loc[x_group.index]
             # preprocessing
-            self.categorical_features[gp_key] = set_categorical_features(data=x_group,
+            self.categorical_features[gp_key] = get_categorical_features(data=x_group,
                                                                          potential_cat_feat=self.params[gp_key].get(
                                                                              'potential_cat_feat', None))
-            gp_transformer = self.transformers.get(gp_key)
-            if gp_transformer:
-                gp_transformer.cols = self.categorical_features[gp_key]
-                x_group = gp_transformer.fit_transform(x_group, y_in)
+            # preprocess nominals
+            gp_transformer_nominals = self.transformers_nominals.get(gp_key)
+            if gp_transformer_nominals:
+                gp_nominals = [feature for feature in self.categorical_features[gp_key] if feature in self.nominals]
+                gp_transformer_nominals.cols = gp_nominals
+                x_group = gp_transformer_nominals.fit_transform(x_group, y_in)
+
+            # preprocess ordinals
+            gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
+            if gp_transformer_ordinals:
+                gp_ordinals = [feature for feature in self.categorical_features[gp_key] if feature in self.ordinals]
+                gp_transformer_ordinals.cols = gp_ordinals
+                x_group = gp_transformer_ordinals.fit_transform(x_group, y_in)
 
             # Find the sub-model for this group key
             try:
@@ -56,7 +81,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
             gp_model = gp_model.fit(X=x_group, y=y_in.values)
 
             self.sub_models[gp_key] = gp_model
-            self.transformers[gp_key] = gp_transformer
+            self.transformers_nominals[gp_key] = gp_transformer_nominals
+            self.transformers_ordinals[gp_key] = gp_transformer_ordinals
             print('Model for ' + gp_key + ' trained')
         return self
 
@@ -68,11 +94,15 @@ class MultiModel(BaseEstimator, RegressorMixin):
         results = []
         for gp_key, group in groups:
             x_group = group[self.selected_features.get(gp_key, group.columns)]
-
             # preprocessing
-            gp_transformer = self.transformers.get(gp_key)
-            if gp_transformer:
-                x_group = gp_transformer.transform(x_group)
+            # nominals
+            gp_transformer_nominals = self.transformers_nominals.get(gp_key)
+            if gp_transformer_nominals:
+                x_group = gp_transformer_nominals.transform(x_group)
+            #ordinals
+            gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
+            if gp_transformer_ordinals:
+                x_group = gp_transformer_ordinals.transform(x_group)
 
             # Find the sub-model for this group key and fit
             try:
@@ -92,7 +122,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
 
     def initiliaze_models(self):
         sub_models = {}
-        transformers = {}
+        transformers_nominals = {}
+        transformers_ordinals = {}
         for gp_key in self.clusters:
             sub_models[gp_key] = xgboost.XGBRegressor(
                 n_estimators=self.params[gp_key].get('n_estimators', 100),
@@ -101,9 +132,15 @@ class MultiModel(BaseEstimator, RegressorMixin):
                 min_child_weight=self.params[gp_key].get('min_child_weight', 1),
                 gamma=self.params[gp_key].get('gamma', 0),
                 colsample_bytree=self.params[gp_key].get('colsample_bytree', 1),
+                objective = partial(squared_error_objective_with_weighting, under_predict_weight=2.0),
                 learning_rate=self.params[gp_key].get('learning_rate', 0.1),
                 silent=True
             )
-            transformer_name = self.params[gp_key].get('transformer', 'OneHotEncoder')
-            transformers.update({gp_key: get_transformer(transformer_name)})
-        return sub_models, transformers
+            # nominals
+            transformer_name = self.params[gp_key].get('transformer_nominal')
+            transformers_nominals.update({gp_key: get_transformer(transformer_name)})
+            #ordinals
+            transformer_name = self.params[gp_key].get('transformer_ordinal')
+            transformers_ordinals.update({gp_key: get_transformer(transformer_name)})
+
+        return sub_models, transformers_nominals, transformers_ordinals

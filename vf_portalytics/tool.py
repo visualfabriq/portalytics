@@ -126,14 +126,14 @@ def squared_error_objective_with_weighting(y_pred, y_true, under_predict_weight=
     return grad, hess
 
 
-def set_categorical_features(data=None, potential_cat_feat=None):
+def get_categorical_features(data=None, potential_cat_feat=None):
     """
     Declare categorical features for the transformer or leave the model find them automatically from the dataset.
     """
     if potential_cat_feat is None and isinstance(data, pd.DataFrame):
         # declare automatically categorical features
         potential_cat_feat = set(data.select_dtypes(include=['object']).columns)
-        potential_cat_feat.update([feat_name for feat_name, row in data.items()
-                                   if 2 < len(row.unique()) < 30])
+        potential_cat_feat.update([feat_name for feat_name, row in data.iteritems()
+                                   if 2 <= len(row.unique()) < 30])
 
-    return set(potential_cat_feat)
+    return list(potential_cat_feat)
