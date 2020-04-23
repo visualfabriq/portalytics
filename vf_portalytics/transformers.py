@@ -1,5 +1,6 @@
 import category_encoders as ce
 
+
 def get_transformer(name):
     potential_transformers = {
         'OneHotEncoder': ce.OneHotEncoder,
@@ -7,7 +8,7 @@ def get_transformer(name):
         'TargetEncoder': ce.TargetEncoder,
         'JamesSteinEncoder': ce.JamesSteinEncoder
     }
-    
+
     try:
         output = potential_transformers[name]
         return output()

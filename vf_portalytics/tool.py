@@ -5,6 +5,7 @@ import shutil
 from sklearn.metrics import mean_absolute_error, r2_score
 import pandas as pd
 
+
 def rm_file_or_dir(path):
     if os.path.exists(path):
         if os.path.isdir(path):
@@ -81,7 +82,7 @@ def create_train_test_sets(df, mask, prediction_model, prediction_target='lift',
     train_df = df[mask]
     train_lift = train_df[prediction_target]
     del train_df[prediction_target]
-    train_df = prediction_model.pre_processing(train_df , train_mode=True)
+    train_df = prediction_model.pre_processing(train_df, train_mode=True)
 
     test_df = df[~mask]
     test_lift = test_df[prediction_target]

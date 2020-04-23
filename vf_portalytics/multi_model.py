@@ -7,6 +7,7 @@ from functools import partial
 from vf_portalytics.tool import get_categorical_features, squared_error_objective_with_weighting
 from vf_portalytics.transformers import get_transformer
 
+
 class MultiModel(BaseEstimator, RegressorMixin):
 
     def __init__(self, group_col=None, clusters=None, params=None,
@@ -89,7 +90,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
             gp_transformer_nominals = self.transformers_nominals.get(gp_key)
             if gp_transformer_nominals:
                 x_group = gp_transformer_nominals.transform(x_group)
-            #ordinals
+            # ordinals
             gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
             if gp_transformer_ordinals:
                 x_group = gp_transformer_ordinals.transform(x_group)
@@ -122,7 +123,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
                 min_child_weight=self.params[gp_key].get('min_child_weight', 1),
                 gamma=self.params[gp_key].get('gamma', 0),
                 colsample_bytree=self.params[gp_key].get('colsample_bytree', 1),
-                objective = partial(squared_error_objective_with_weighting, under_predict_weight=2.0),
+                objective=partial(squared_error_objective_with_weighting, under_predict_weight=2.0),
                 learning_rate=self.params[gp_key].get('learning_rate', 0.1),
                 silent=True
             )
