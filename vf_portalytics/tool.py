@@ -128,12 +128,12 @@ def squared_error_objective_with_weighting(y_pred, y_true, under_predict_weight=
 
 def get_categorical_features(data=None, potential_cat_feat=None):
     """
-    Declare categorical features for the transformer or leave the model find them automatically from the dataset.
+    Given a DataFrame
+    Return a list of features that are potentially categorical
+    If potential_cat_feat is given returns it back
     """
     if potential_cat_feat is None and isinstance(data, pd.DataFrame):
-        # declare automatically categorical features
         potential_cat_feat = set(data.select_dtypes(include=['object']).columns)
-        potential_cat_feat.update([feat_name for feat_name, row in data.iteritems()
+        potential_cat_feat.update([feat_name for feat_name, row in data.items()
                                    if 2 <= len(row.unique()) < 30])
-
     return list(potential_cat_feat)

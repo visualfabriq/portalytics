@@ -1,24 +1,11 @@
 import pandas as pd
 import xgboost
-
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.dummy import DummyClassifier
-
-from vf_portalytics.tool import get_categorical_features
-from vf_portalytics.transformers import get_transformer
-
-import pandas as pd
-import xgboost
-import copy
 from functools import partial
 
-from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
-from sklearn.dummy import DummyClassifier
-
-from vf_portalytics.tool import get_categorical_features
+from vf_portalytics.tool import get_categorical_features, squared_error_objective_with_weighting
 from vf_portalytics.transformers import get_transformer
-
-from vf_portalytics.tool import squared_error_objective_with_weighting
 
 class MultiModel(BaseEstimator, RegressorMixin):
 
@@ -30,6 +17,9 @@ class MultiModel(BaseEstimator, RegressorMixin):
             group_col: string; name of the column that the groups exist
             clusters: array; with the name of unique groups
             params: dictionary with keys the group names and values dictionaries of the selected hyperparameters
+            selected_features: a dictionary with keys the cluster name and values list of selected features
+            nominals: list of the features (from all clusters) that are nominal
+            ordinals: list of the features (from all clusters) that are ordinal
         """
         self.group_col = group_col
         self.clusters = clusters
@@ -139,7 +129,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
             # nominals
             transformer_name = self.params[gp_key].get('transformer_nominal')
             transformers_nominals.update({gp_key: get_transformer(transformer_name)})
-            #ordinals
+            # ordinals
             transformer_name = self.params[gp_key].get('transformer_ordinal')
             transformers_ordinals.update({gp_key: get_transformer(transformer_name)})
 
