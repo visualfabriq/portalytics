@@ -78,9 +78,6 @@ class MultiModel(BaseEstimator, RegressorMixin):
         return self
 
     def predict(self, X, y=None):
-        """
-        Same as 'fit', but call the 'predict' method for each submodel and return the results.
-        """
         groups = X.groupby(by=self.group_col)
         results = []
         for gp_key, group in groups:
