@@ -3,6 +3,7 @@ import numpy as np
 import os
 import shutil
 from sklearn.metrics import mean_absolute_error, r2_score
+import pandas as pd
 
 
 def rm_file_or_dir(path):
@@ -81,7 +82,7 @@ def create_train_test_sets(df, mask, prediction_model, prediction_target='lift',
     train_df = df[mask]
     train_lift = train_df[prediction_target]
     del train_df[prediction_target]
-    train_df = prediction_model.pre_processing(train_df , train_mode=True)
+    train_df = prediction_model.pre_processing(train_df, train_mode=True)
 
     test_df = df[~mask]
     test_lift = test_df[prediction_target]
@@ -124,3 +125,16 @@ def squared_error_objective_with_weighting(y_pred, y_true, under_predict_weight=
     grad = np.where(grad > 0, grad * under_predict_weight, grad * over_predict_weight)
     hess = np.full(y_true.shape, 1.0)
     return grad, hess
+
+
+def get_categorical_features(data=None, potential_cat_feat=None):
+    """
+    Given a DataFrame
+    Return a list of features that are potentially categorical
+    If potential_cat_feat is given returns it back
+    """
+    if potential_cat_feat is None and isinstance(data, pd.DataFrame):
+        potential_cat_feat = set(data.select_dtypes(include=['object']).columns)
+        potential_cat_feat.update([feat_name for feat_name, row in data.items()
+                                   if 2 <= len(row.unique()) < 30])
+    return list(potential_cat_feat)
