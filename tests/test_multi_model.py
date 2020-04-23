@@ -67,7 +67,7 @@ def test_multi_model():
     # keep all the features
     selected_features = {}
     for gp_key in clusters:
-        selected_features[gp_key] = set(feature_col_list)
+        selected_features[gp_key] = feature_col_list
     nominal_features = ['feature_0']
     ordinal_features = ['feature_1']
 
