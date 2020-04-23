@@ -34,7 +34,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
     def fit(self, X, y=None):
         """
         Partition the training data, X, into groups for each unique combination of values in
-        'self.group_col' columns. For each group, train the appropriate model specified in 'self.sub_models'.
+        'group_col' columns. For each group, train the appropriate model specified in 'sub_models'.
         If there is no sub_model for a group, predict 0
         The models are being trained using only the features that their names starts with 'promoted_price'
         """
