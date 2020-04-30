@@ -120,7 +120,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
                 min_child_weight=self.params[gp_key].get('min_child_weight', 1),
                 gamma=self.params[gp_key].get('gamma', 0),
                 colsample_bytree=self.params[gp_key].get('colsample_bytree', 1),
-                objective=partial(squared_error_objective_with_weighting, under_predict_weight=2.0),
+                objective=partial(squared_error_objective_with_weighting,
+                                  under_predict_weight=self.params[gp_key].get('under_predict_weight', 2.0)),
                 learning_rate=self.params[gp_key].get('learning_rate', 0.1),
                 silent=True
             )
