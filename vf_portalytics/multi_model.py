@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import xgboost
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.dummy import DummyClassifier
@@ -105,7 +106,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
             result = pd.Series(index=x_group.index, data=result)
             results.append(result)
         results = pd.concat(results, axis=0)
-        results = pd.Series(index=X.index, data=results, name='predicted')
+        results = pd.Series(index=X.index, data=results, name='predicted', dtype=np.float64)
         return results
 
     def initiliaze_models(self):
