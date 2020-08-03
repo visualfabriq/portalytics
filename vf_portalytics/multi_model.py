@@ -79,6 +79,12 @@ class MultiModel(BaseEstimator, RegressorMixin):
         return self
 
     def predict(self, X, y=None):
+        # single model
+        if self.group_col not in X.columns:
+            if not len(self.clusters) == 1:
+                raise AssertionError('The features that indicates categories in trainset do not exist in new data')
+            X[self.group_col] = self.clusters[0]
+
         groups = X.groupby(by=self.group_col)
         results = []
         for gp_key, group in groups:
