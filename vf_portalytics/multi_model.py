@@ -75,7 +75,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
             self.sub_models[gp_key] = gp_model
             self.transformers_nominals[gp_key] = gp_transformer_nominals
             self.transformers_ordinals[gp_key] = gp_transformer_ordinals
-            print('Model for ' + gp_key + ' trained')
+            print('Model for %s trained' % str(gp_key))
         return self
 
     def predict(self, X, y=None):
