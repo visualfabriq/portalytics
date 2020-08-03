@@ -124,10 +124,8 @@ def test_multi_model_to_single_model():
 
     # imitate params given from hyper optimization tuning
     params = {
-        'A': {'transformer_nominal': 'TargetEncoder',
+        'group_0': {'transformer_nominal': 'TargetEncoder',
               'transformer_ordinal': 'OrdinalEncoder'},
-        'B': {'transformer_nominal': 'TargetEncoder',
-                    'transformer_ordinal': 'OrdinalEncoder'}
     }
 
 
