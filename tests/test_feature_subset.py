@@ -67,14 +67,22 @@ def test_feauture_subset_model():
     lookup_dict = make_dict()
 
     subset_cols = ('account_banner', 'product_desc')
+    input_columns = ['promoted_price']
+    multiplication_columns = ['predicted_market_volume', 'consumer_length']
+    division_columns = ['product_volume_per_sku']
+
     sub_models = {
         ('A', 'X'): LinearRegression(),
         ('B', 'Y'): DecisionTreeRegressor(),
     }
 
     pipeline = Pipeline([
-        ('transform', FeatureSubsetTransform(group_cols=subset_cols, transformer=PolynomialFeatures(2))),
-        ('estimate', FeatureSubsetModel(lookup_dict=lookup_dict, group_cols=subset_cols, sub_models=sub_models))
+        ('transform', FeatureSubsetTransform(group_cols=subset_cols, transformer=PolynomialFeatures(2),
+                                             input_columns=input_columns, multiplication_columns=multiplication_columns,
+                                             division_columns=division_columns)),
+        ('estimate', FeatureSubsetModel(lookup_dict=lookup_dict, group_cols=subset_cols,
+                                        input_columns=input_columns, multiplication_columns=multiplication_columns,
+                                        division_columns=division_columns, sub_models=sub_models))
     ])
 
     # Note: must use one_hot_encode=False to prevent one-hot encoding of categorical features in input data

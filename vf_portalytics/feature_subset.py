@@ -1,29 +1,33 @@
 import pandas as pd
-from copy import deepcopy
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.dummy import DummyClassifier
 
+
 class FeatureSubsetTransform(BaseEstimator, TransformerMixin):
 
-    def __init__(self, group_cols=None, transformer=None):
+    def __init__(self, group_cols=None, input_columns=None, multiplication_columns=None,
+                 division_columns=None, transformer=None):
         """Build a feature tranformer"""
         self.transformer = transformer
+        self.input_columns = input_columns
+        self.multiplication_columns = multiplication_columns
+        self.division_columns = division_columns
         self.group_cols = group_cols
 
     def fit(self, X, y=None):
         """Drop the columns that are being used to group the data and fit the transformer"""
         x_in = X.drop([n for n in self.group_cols], axis=1)
-        self.transformer = self.transformer.fit(X=x_in[['promoted_price']])
+        self.transformer = self.transformer.fit(X=x_in[self.input_columns])
         return self
 
     def transform(self, X):
         x_in = X.drop([n for n in self.group_cols], axis=1)
         # transform the promoted_price collumn
-        transformed_price = self.transformer.transform(X=x_in[['promoted_price']])
+        transformed_price = self.transformer.transform(X=x_in[self.input_columns])
         # convert data into initial format
         transformed_price = pd.DataFrame(data=transformed_price, index=x_in.index,
-                                         columns=self.transformer.get_feature_names(['promoted_price']))
-        transformed_price.drop(['1', 'promoted_price'], axis=1, inplace=True)
+                                         columns=self.transformer.get_feature_names(self.input_columns))
+        transformed_price.drop(self.input_columns + ['1'], axis=1, inplace=True)
         transformed_x = pd.concat([x_in, transformed_price], axis=1)
         transformed_x[list(self.group_cols)] = X[list(self.group_cols)]
         return transformed_x
@@ -31,12 +35,16 @@ class FeatureSubsetTransform(BaseEstimator, TransformerMixin):
 
 class FeatureSubsetModel(BaseEstimator, RegressorMixin):
 
-    def __init__(self, lookup_dict=None, group_cols=None, sub_models=None):
+    def __init__(self, lookup_dict=None, group_cols=None, input_columns=None, multiplication_columns=None,
+                 division_columns=None, sub_models=None):
         """
         Build regression model for subsets of feature rows matching particular combination of feature columns.
         """
         self.lookup_dict = lookup_dict
         self.group_cols = group_cols
+        self.input_columns = input_columns
+        self.multiplication_columns = multiplication_columns
+        self.division_columns = division_columns
         self.sub_models = sub_models
 
     def fit(self, X, y=None):
@@ -59,7 +67,7 @@ class FeatureSubsetModel(BaseEstimator, RegressorMixin):
             y_in = y.loc[x_in.index]
 
             # Fit the submodel with subset of rows and only collumns related to price
-            gp_model = gp_model.fit(X=x_in[[col for col in x_in if col.startswith('promoted_price')]], y=y_in.values)
+            gp_model = gp_model.fit(X=x_in[self.input_columns], y=y_in.values)
             self.sub_models[gp_key] = gp_model
         return self
 
@@ -77,16 +85,20 @@ class FeatureSubsetModel(BaseEstimator, RegressorMixin):
 
         for gp_key, x_group in groups:
             x_in = x_group.drop([n for n in self.group_cols], axis=1)
-            gp_model = self.sub_models.get(gp_key, DummyClassifier(constant=0).fit(x_in, [0]*len(x_in)))
+            gp_model = self.sub_models.get(gp_key, DummyClassifier(constant=0).fit(x_in, [0] * len(x_in)))
 
             # predict market share only using price related data
-            predicted_market_share = gp_model.predict(X=x_in[[col for col in x_in if col.startswith('promoted_price')]])
+            predicted_market_share = gp_model.predict(X=x_in[self.input_columns])
             predicted_market_share = pd.Series(index=x_in.index, data=predicted_market_share)
 
-            result = predicted_market_share.mul(
-                x_group['predicted_market_volume']).mul(
-                x_group['consumer_length']).div(
-                x_group['product_volume_per_sku']).clip(lower=0)
+            result = predicted_market_share
+            # multiplication
+            for mul_col in self.multiplication_columns:
+                result *= x_in[mul_col]
+
+            # division
+            for div_col in self.division_columns:
+                result /= x_in[div_col]
 
             results.append(result)
         return pd.concat(results, axis=0)
