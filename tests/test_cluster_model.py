@@ -1,13 +1,12 @@
 import itertools
 import random
+from collections import defaultdict
 
 import numpy as np
 import numpy.testing as npt
 import pandas as pd
 
-from collections import defaultdict
 from numpy.random import randint
-from random import SystemRandom
 from pandas.util.testing import assert_series_equal
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
@@ -27,7 +26,7 @@ def make_dataset(random_state, n_informative, column_names, **kwargs):
         n_informative=min(n_informative, 5),
         random_state=random_state
     )
-    cryptogen = SystemRandom()
+    cryptogen = random.SystemRandom()
     x = pd.DataFrame(x)
     x.columns = [name for name in column_names]
     x = x.assign(**kwargs)
@@ -48,9 +47,7 @@ def make_dict():
     the model will predict 0.
     """
     all_list = [list(range(1, 54)), [0]]
-    keys = list(itertools.product(*all_list))
-    values = [random.choice(np.linspace(-2.5, 2.5, num=500)) for i in range(len(keys))]
-    return dict(zip(keys, values))
+    return {key: random.choice(np.linspace(-2.5, 2.5, num=500)) for key in itertools.product(*all_list)}
 
 
 def defaultdict_to_dict(defdict):
@@ -119,7 +116,7 @@ def test_cluster_model():
 
     predicted_y = model_wrapper.model.predict(test_x)
 
-    _ = model_wrapper.model.fit(train_x, train_y)
+    model_wrapper.model.fit(train_x, train_y)
 
     # No more defaultdict from here one, this is only useful during training
     model_wrapper.model.sub_models = defaultdict_to_dict(model_wrapper.model.sub_models)

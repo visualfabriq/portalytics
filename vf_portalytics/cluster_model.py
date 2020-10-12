@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 
@@ -55,10 +57,10 @@ class ClusterModel(BaseEstimator, RegressorMixin):
         self.min_observations_per_cluster = min_observations_per_cluster
 
         if seasonality_dict is not None and (seasonality_key_columns is None or len(seasonality_key_columns) == 0):
-            raise AssertionError("Using seasonality_dict without seasonality_key_columns")
+            raise KeyError("Using seasonality_dict without seasonality_key_columns")
 
         if seasonality_key_columns is not None and len(seasonality_key_columns) > 0 and seasonality_dict is None:
-            raise AssertionError("Using seasonality_key_columns without seasonality_dict")
+            raise KeyError("Using seasonality_key_columns without seasonality_dict")
 
     def fit(self, X, y=None):
         """
@@ -124,6 +126,7 @@ class ClusterModel(BaseEstimator, RegressorMixin):
                 except Exception:
                     print("Unable to train model for clustering key {}. Check if your data ".format(clustering_key) +
                           "contains zeroes in the multiplication columns for example.")
+                    logging.exception("Exception")
 
         return self
 
