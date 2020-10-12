@@ -75,7 +75,7 @@ def test_cluster_model():
     test_x, test_y = total_x.loc[test_index, :], total_y.loc[test_index]
 
     # Note: must use one_hot_encode=False to prevent one-hot encoding of categorical features in input data
-    model_wrapper = PredictionModel("my_test_model", path='../tests/tmp', one_hot_encode=False)
+    model_wrapper = PredictionModel("my_test_model", path='/tmp', one_hot_encode=False)
 
     # Super-simple form of seasonality: always factor 1
     seasonality_dict = {year * 100 + week: 1 for year in range(2016, 2116) for week in range(1, 53)}
@@ -124,7 +124,7 @@ def test_cluster_model():
     model_wrapper.save()
 
     # Load model and check if the properties are saved as well
-    saved_model = PredictionModel('my_test_model', path='../tests/tmp')
+    saved_model = PredictionModel('my_test_model', path='/tmp')
 
     saved_model_predicted_y = saved_model.model.predict(test_x)
 
