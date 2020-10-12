@@ -201,6 +201,12 @@ class PriceElasticityModel(BaseEstimator, RegressorMixin):
                  price_column="promoted_price",
                  base_price_column="base_price",
                  baseline_column="baseline_units"):
+        """
+        :param sub_model: Dict of sub models
+        :param price_column: Promoted price
+        :param base_price_column: Base price
+        :param baseline_column: Baseline units
+        """
         self.sub_model = sub_model
         self.price_column = price_column
         self.base_price_column = base_price_column

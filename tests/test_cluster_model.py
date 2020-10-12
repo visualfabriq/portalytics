@@ -7,12 +7,13 @@ import pandas as pd
 
 from collections import defaultdict
 from numpy.random import randint
+from random import SystemRandom
 from pandas.util.testing import assert_series_equal
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 
-from vf_portalytics.cluster_model import ClusterModel, PriceElasticityModel
+from vf_portalytics.cluster_model import ClusterModel
 from vf_portalytics.model import PredictionModel
 
 
@@ -26,21 +27,23 @@ def make_dataset(random_state, n_informative, column_names, **kwargs):
         n_informative=min(n_informative, 5),
         random_state=random_state
     )
+    cryptogen = SystemRandom()
     x = pd.DataFrame(x)
     x.columns = [name for name in column_names]
     x = x.assign(**kwargs)
     x['yearweek'] = randint(1, 54, len(x))
     # pack_type (original_product_dimension_44) 0: 'Can', 1: 'Bottle'
-    x['original_product_dimension_44'] = [random.choice([0, 1]) for i in range(len(x))]
-    x['original_product_dimension_47'] = [random.choice([0, 1, 2, 3]) for i in range(len(x))]
-    x['original_product_dimension_48'] = [random.choice([0, 1, 2, 3]) for i in range(len(x))]
+    x['original_product_dimension_44'] = [cryptogen.randrange(1) for i in range(len(x))]
+    x['original_product_dimension_47'] = [cryptogen.randrange(4) for i in range(len(x))]
+    x['original_product_dimension_48'] = [cryptogen.randrange(4) for i in range(len(x))]
     x['original_product_dimension_42'] = x['original_product_dimension_48'].map(lambda x: x % 2)
 
     return x, pd.Series(y)
 
 
 def make_dict():
-    """Creates a dictionary with keys all the combinations between the weeks of the year and the pack types
+    """
+    Creates a dictionary with keys all the combinations between the weeks of the year and the pack types
     In this case we have only one pack type, in order to check if when we dont have the pack type in the dict,
     the model will predict 0.
     """
@@ -74,11 +77,8 @@ def test_cluster_model():
     train_x, train_y = total_x.loc[train_index, :], total_y.loc[train_index]
     test_x, test_y = total_x.loc[test_index, :], total_y.loc[test_index]
 
-    # create dictionary "predicted_market_volumes" - "lookup_dict"
-    lookup_dict = make_dict()
-
     # Note: must use one_hot_encode=False to prevent one-hot encoding of categorical features in input data
-    model_wrapper = PredictionModel("my_test_model", path='/tmp', one_hot_encode=False)
+    model_wrapper = PredictionModel("my_test_model", path='../tests/tmp', one_hot_encode=False)
 
     # Super-simple form of seasonality: always factor 1
     seasonality_dict = {year * 100 + week: 1 for year in range(2016, 2116) for week in range(1, 53)}
@@ -127,16 +127,10 @@ def test_cluster_model():
     model_wrapper.save()
 
     # Load model and check if the properties are saved as well
-    saved_model = PredictionModel('my_test_model', path='/tmp')
-
-    saved_model.model
-    saved_model.features
+    saved_model = PredictionModel('my_test_model', path='../tests/tmp')
 
     saved_model_predicted_y = saved_model.model.predict(test_x)
 
-    assert saved_model.features == model_wrapper.features
-    assert saved_model.ordered_column_list == model_wrapper.ordered_column_list
-    assert saved_model.target == model_wrapper.target
     assert_series_equal(saved_model_predicted_y, predicted_y, check_less_precise=0)
 
     # check totally new data
