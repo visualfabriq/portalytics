@@ -32,13 +32,13 @@ class ClusterModel(BaseEstimator, RegressorMixin):
             An ordered list of lists of column names that are to be used in the clustering. Items that are earlier in
             the list take preference over those later in the list.
         input_columns : str[]
-            A list of columns in the dataframes that are used for predict() and fit() that contain the explanatory
+            A list of columns in the DataFrames that are used for predict() and fit() that contain the explanatory
             variables.
         multiplication_columns : str[]
-            A list of columns in the dataframes that are used as multipliers during predict() and as divisors during
+            A list of columns in the DataFrames that are used as multipliers during predict() and as divisors during
             fit() to scale the target variable with.
         division_columns : str[]
-            A list of columns in the dataframes that are used as divisors during predict() and as multipliers during
+            A list of columns in the DataFrames that are used as divisors during predict() and as multipliers during
             fit() to scale the target variable with.
         sub_models : dict | None
             A dictionary of dictionaries that contain the models that are to be fitted and used. The first level of the
