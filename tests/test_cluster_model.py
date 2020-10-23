@@ -6,6 +6,7 @@ import numpy as np
 import numpy.testing as npt
 import pandas as pd
 
+from collections import defaultdict
 from numpy.random import randint
 from pandas.util.testing import assert_series_equal
 from sklearn.datasets import make_regression
@@ -41,8 +42,7 @@ def make_dataset(random_state, n_informative, column_names, **kwargs):
 
 
 def make_dict():
-    """
-    Creates a dictionary with keys all the combinations between the weeks of the year and the pack types
+    """Creates a dictionary with keys all the combinations between the weeks of the year and the pack types
     In this case we have only one pack type, in order to check if when we dont have the pack type in the dict,
     the model will predict 0.
     """
@@ -135,4 +135,4 @@ def test_cluster_model():
     x, y = make_dataset(3, 1, column_names, account_banner='EE', product_desc='QQ')
     predicted_y = saved_model.model.predict(x)
 
-    npt.assert_almost_equal(predicted_y, [-1] * len(predicted_y))
+    npt.assert_almost_equal(predicted_y, np.array([-1] * len(predicted_y)).reshape(-1, 1))

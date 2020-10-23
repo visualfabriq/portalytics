@@ -55,6 +55,7 @@ class ClusterModel(BaseEstimator, RegressorMixin):
         self.division_columns = division_columns
         self.sub_models = sub_models
         self.min_observations_per_cluster = min_observations_per_cluster
+        self.nr_target_variables = 1
 
         if seasonality_dict is not None and (seasonality_key_columns is None or len(seasonality_key_columns) == 0):
             raise KeyError("Using seasonality_dict without seasonality_key_columns")
@@ -74,6 +75,12 @@ class ClusterModel(BaseEstimator, RegressorMixin):
         The models are being trained using only the features that are available in self.input_columns."""
         fitted_indices = pd.Series()
 
+        if hasattr(y, "iloc"):
+            if hasattr(y.iloc[0], "__len__"):
+                self.nr_target_variables = len(y.iloc[0])
+        elif hasattr(y[0], "__len__"):
+            self.nr_target_variables = len(y[0])
+
         # Calculate the seasonality_values if applicable
         if self.seasonality_dict is not None:
             seasonality_values = \
@@ -86,6 +93,9 @@ class ClusterModel(BaseEstimator, RegressorMixin):
 
             for clustering_key, cluster in clusters:
                 if len(cluster) < self.min_observations_per_cluster:
+                    continue
+
+                if "Unknown" in clustering_key:
                     continue
 
                 # Find the sub-model for this group key
@@ -103,8 +113,9 @@ class ClusterModel(BaseEstimator, RegressorMixin):
                 x_in = cluster.drop([n for n in clustering_key_column_set], axis=1)
                 y_in = y.loc[x_in.index]
 
-                # During training, we divide by the seasonality_values
-                y_in /= seasonality_values.loc[x_in.index]
+                if self.seasonality_dict is not None:
+                    # During training, we divide by the seasonality_values
+                    y_in /= seasonality_values.loc[x_in.index]
 
                 # During training, we switch multiplication and division around,
                 # so we multiply by the division_columns
@@ -123,9 +134,9 @@ class ClusterModel(BaseEstimator, RegressorMixin):
                     self.sub_models[clustering_key_column_set][clustering_key] = cluster_model
 
                     fitted_indices.append(pd.Series(cluster.index))
-                except Exception:
+                except Exception as e:
                     print("Unable to train model for clustering key {}. Check if your data ".format(clustering_key) +
-                          "contains zeroes in the multiplication columns for example.")
+                          "contains zeroes in the multiplication columns for example:", e)
                     logging.exception("Exception")
 
         return self
@@ -153,6 +164,9 @@ class ClusterModel(BaseEstimator, RegressorMixin):
             clusters = X[~X.index.isin(scored_record_indices)].groupby(by=list(clustering_key_column_set))
 
             for clustering_key, cluster in clusters:
+                if "Unknown" in clustering_key:
+                    continue
+
                 if clustering_key in self.sub_models[clustering_key_column_set]:
                     # Do not change this to .get() with a default value: this breaks functionality for defaultdicts
                     sub_model = self.sub_models[clustering_key_column_set][clustering_key]
@@ -185,10 +199,13 @@ class ClusterModel(BaseEstimator, RegressorMixin):
                     predictions = sub_model.predict(x_in)
 
                 scored_record_indices |= set(cluster.index)
-                results.append(predictions.clip(lower=0))
+                results.append(pd.DataFrame(predictions, index=cluster.index).clip(lower=0))
 
         # Predict -1 for the rest
-        results.append(pd.Series(-1, index=X[~X.index.isin(scored_record_indices)].index))
+        indices_to_score = X[~X.index.isin(scored_record_indices)].index
+        results.append(pd.DataFrame(-np.ones(self.nr_target_variables * len(indices_to_score))
+                                    .reshape(len(indices_to_score), self.nr_target_variables),
+                                    index=indices_to_score))
 
         return pd.concat(results, axis=0).loc[X.index]
 
