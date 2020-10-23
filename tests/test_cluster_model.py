@@ -128,7 +128,7 @@ def test_cluster_model():
 
     saved_model_predicted_y = saved_model.model.predict(test_x)
 
-    assert_series_equal(saved_model_predicted_y, predicted_y, check_less_precise=0)
+    npt.assert_almost_equal(saved_model_predicted_y.values, predicted_y.values)
 
     # check totally new data
     # create on more that will not have sub_model and will predict -1
