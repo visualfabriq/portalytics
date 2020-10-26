@@ -55,7 +55,7 @@ class ClusterModel(BaseEstimator, RegressorMixin):
         self.division_columns = division_columns
         self.sub_models = sub_models
         self.min_observations_per_cluster = min_observations_per_cluster
-        self.nr_target_variables =  1
+        self.nr_target_variables = 1
 
         if seasonality_dict is not None and (seasonality_key_columns is None or len(seasonality_key_columns) == 0):
             raise KeyError("Using seasonality_dict without seasonality_key_columns")
@@ -115,18 +115,18 @@ class ClusterModel(BaseEstimator, RegressorMixin):
 
                 if self.seasonality_dict is not None:
                     # During training, we divide by the seasonality_values
-                    y_in /= seasonality_values.loc[x_in.index]
+                    y_in /= seasonality_values.loc[x_in.index].values
 
                 # During training, we switch multiplication and division around,
                 # so we multiply by the division_columns
                 for div_col in self.division_columns:
-                    y_in *= cluster.loc[x_in.index][div_col]
+                    y_in *= cluster.loc[x_in.index][div_col].values
 
                 # During training, we switch multiplication and division around,
                 # so we divide by the multiplication_columns
                 for mul_col in self.multiplication_columns:
                     # During training, we switch multiplication and division around
-                    y_in /= cluster.loc[x_in.index][mul_col]
+                    y_in /= cluster.loc[x_in.index][mul_col].values
 
                 # Fit the sub-model with subset of rows
                 try:
@@ -183,15 +183,15 @@ class ClusterModel(BaseEstimator, RegressorMixin):
 
                     # Multiply by seasonality
                     if self.seasonality_dict is not None:
-                        predictions *= seasonality_values.loc[x_in.index]
+                        predictions *= seasonality_values.loc[x_in.index].values
 
                     # Multiply by multiplication columns
                     for mul_col in self.multiplication_columns:
-                        predictions *= x_in.loc[x_in.index][mul_col]
+                        predictions *= x_in.loc[x_in.index][mul_col].values
 
                     # Divide by multiplication columns
                     for div_col in self.division_columns:
-                        predictions /= x_in.loc[x_in.index][div_col]
+                        predictions /= x_in.loc[x_in.index][div_col].values
                 except Exception:
                     # ALlow for fallback models, like the PriceElasticityModel.
                     # In that case, pass on all variables to the model, and don't
@@ -204,7 +204,7 @@ class ClusterModel(BaseEstimator, RegressorMixin):
         # Predict -1 for the rest
         indices_to_score = X[~X.index.isin(scored_record_indices)].index
         results.append(pd.DataFrame(-np.ones(self.nr_target_variables * len(indices_to_score))
-                                    .reshape(len(indices_to_score), self.nr_target_variables),
+                                       .reshape(len(indices_to_score), self.nr_target_variables),
                                     index=indices_to_score))
 
         return pd.concat(results, axis=0).loc[X.index]
