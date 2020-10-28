@@ -1,12 +1,75 @@
 import pandas as pd
 import numpy as np
 import xgboost
-from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.dummy import DummyClassifier
+from sklearn.preprocessing import MinMaxScaler
 from functools import partial
 
 from vf_portalytics.tool import get_categorical_features, squared_error_objective_with_weighting
 from vf_portalytics.transformers import get_transformer
+
+class MultiModelTransform(BaseEstimator, TransformerMixin):
+
+    def __init__(self, transformer=None, ordinals=None,
+                 nominals=None, categorical_features=None, selected_features=None, group_col=None):
+
+        self.group_col = group_col
+        self.selected_features = selected_features
+        self.categorical_features = categorical_features
+        self.transformer = transformer
+        self.ordinals = ordinals
+        self.nominals = nominals
+        self.transformers_ordinals = {}
+        self.transformers_nominals = {}
+
+    def fit_transform(self, X, y=None, **fit_params):
+        categorical_features = get_categorical_features(data=X)
+
+        # preprocess ordinals
+        transformer_ordinal = get_transformer('OrdinalEncoder')
+        gp_ordinal = [feature for feature in categorical_features if feature in self.ordinals]
+        transformer_ordinal.cols = gp_ordinal
+
+        # preprocess nominals
+        transformer_nominal = get_transformer('TargetEncoder')
+        gp_nominals = [feature for feature in categorical_features if
+                       feature in self.nominals or feature not in gp_ordinal]
+        transformer_nominal.cols = gp_nominals
+
+        groups = X.groupby(by=self.group_col)
+        total_df = pd.DataFrame()
+        for gp_key, group in groups:
+            x_group = group[self.selected_features[gp_key]]
+            y_in = y.loc[x_group.index]
+            # preprocessing
+            self.categorical_features[gp_key] = get_categorical_features(data=x_group,
+                                                                         potential_cat_feat=self.params[gp_key].get(
+                                                                             'potential_cat_feat', None))
+            # preprocess nominals
+            self.transformers_nominals.update({gp_key: transformer_nominal})
+            gp_transformer_nominals = self.transformers_nominals.get(gp_key)
+            if gp_transformer_nominals:
+                gp_nominals = [feature for feature in self.categorical_features[gp_key] if feature in self.nominals]
+                gp_transformer_nominals.cols = gp_nominals
+                x_group = gp_transformer_nominals.fit_transform(x_group, y_in)
+                total_df = total_df.append(x_group)
+
+            # preprocess ordinals
+            self.transformers_ordinals.update({gp_key: transformer_ordinal})
+            gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
+            if gp_transformer_ordinals:
+                gp_ordinals = [feature for feature in self.categorical_features[gp_key] if feature in self.ordinals]
+                gp_transformer_ordinals.cols = gp_ordinals
+                x_group = gp_transformer_ordinals.fit_transform(x_group, y_in)
+                total_df = total_df.append(x_group)
+
+        # Append transformed x_group objects to a total dataframe
+        # Then transform total df with MinMaxScaler
+        scaler = MinMaxScaler()
+        x_group_transformed = scaler.fit_transform(total_df)
+
+        return x_group_transformed
 
 
 class MultiModel(BaseEstimator, RegressorMixin):
