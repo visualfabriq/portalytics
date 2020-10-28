@@ -72,6 +72,6 @@ def test_multi_model_transform():
 
     transformer = MultiModelTransform(group_col=cat_feature, selected_features=selected_features,
                                       ordinals=ordinal_features, nominals=nominal_features)
-    total_x_transformed = transformer.fit_transform(total_x)
+    total_x_transformed = transformer.fit_transform(X=total_x, y=total_y)
     # TODO: add better test
     assert (total_x_transformed.values != 0).all()
