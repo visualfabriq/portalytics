@@ -11,12 +11,13 @@ from vf_portalytics.transformers import get_transformer
 
 class MultiModelTransform(BaseEstimator, TransformerMixin):
 
-    def __init__(self, transformer=None, ordinals=None,
-                 nominals=None, categorical_features=None, selected_features=None, group_col=None):
+    def __init__(self, transformer=None, ordinals=None, params = None,
+                 nominals=None, selected_features=None, group_col=None):
 
+        self.params = params
         self.group_col = group_col
         self.selected_features = selected_features
-        self.categorical_features = categorical_features
+        self.categorical_features = dict()
         self.transformer = transformer
         self.ordinals = ordinals
         self.nominals = nominals
@@ -46,6 +47,7 @@ class MultiModelTransform(BaseEstimator, TransformerMixin):
             self.categorical_features[gp_key] = get_categorical_features(data=x_group,
                                                                          potential_cat_feat=self.params[gp_key].get(
                                                                              'potential_cat_feat', None))
+
             # preprocess nominals
             self.transformers_nominals.update({gp_key: transformer_nominal})
             gp_transformer_nominals = self.transformers_nominals.get(gp_key)
@@ -53,7 +55,6 @@ class MultiModelTransform(BaseEstimator, TransformerMixin):
                 gp_nominals = [feature for feature in self.categorical_features[gp_key] if feature in self.nominals]
                 gp_transformer_nominals.cols = gp_nominals
                 x_group = gp_transformer_nominals.fit_transform(x_group, y_in)
-                total_df = total_df.append(x_group)
 
             # preprocess ordinals
             self.transformers_ordinals.update({gp_key: transformer_ordinal})
@@ -62,7 +63,8 @@ class MultiModelTransform(BaseEstimator, TransformerMixin):
                 gp_ordinals = [feature for feature in self.categorical_features[gp_key] if feature in self.ordinals]
                 gp_transformer_ordinals.cols = gp_ordinals
                 x_group = gp_transformer_ordinals.fit_transform(x_group, y_in)
-                total_df = total_df.append(x_group)
+
+            total_df = total_df.append(x_group)
 
         # Append transformed x_group objects to a total dataframe
         # Then transform total df with MinMaxScaler

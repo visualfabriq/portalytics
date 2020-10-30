@@ -3,7 +3,7 @@ import numpy as np
 
 from sklearn.datasets import make_regression
 
-from vf_portalytics.multi_model import MultiModel, MultiModelTransform
+from vf_portalytics.multi_model import MultiModelTransform
 
 
 def make_regression_dataset(n_samples, n_features, n_informative, **kwargs):
@@ -70,8 +70,19 @@ def test_multi_model_transform():
     nominal_features = ['feature_0']
     ordinal_features = ['feature_1']
 
+    params = {
+        'A': {'transformer_nominal': 'TargetEncoder',
+              'transformer_ordinal': 'OrdinalEncoder'},
+        'B': {'transformer_nominal': 'TargetEncoder',
+              'transformer_ordinal': 'OrdinalEncoder'},
+        'C': {'transformer_nominal': 'TargetEncoder',
+              'transformer_ordinal': 'OrdinalEncoder'},
+        'D': {'transformer_nominal': 'TargetEncoder',
+              'transformer_ordinal': 'OrdinalEncoder'},
+    }
+
     transformer = MultiModelTransform(group_col=cat_feature, selected_features=selected_features,
-                                      ordinals=ordinal_features, nominals=nominal_features)
+                                      ordinals=ordinal_features, nominals=nominal_features, params=params)
     total_x_transformed = transformer.fit_transform(X=total_x, y=total_y)
     # TODO: add better test
-    assert (total_x_transformed.values != 0).all()
+    assert not (total_x_transformed == 0).all()
