@@ -9,22 +9,22 @@ from functools import partial
 from vf_portalytics.tool import get_categorical_features, squared_error_objective_with_weighting
 from vf_portalytics.transformers import get_transformer
 
+
 class MultiModelTransform(BaseEstimator, TransformerMixin):
 
-    def __init__(self, transformer=None, ordinals=None, params = None,
-                 nominals=None, selected_features=None, group_col=None):
+    def __init__(self, ordinals, params, nominals, selected_features, group_col):
 
         self.params = params
         self.group_col = group_col
         self.selected_features = selected_features
         self.categorical_features = dict()
-        self.transformer = transformer
         self.ordinals = ordinals
         self.nominals = nominals
         self.transformers_ordinals = {}
         self.transformers_nominals = {}
+        self.scaler = None
 
-    def fit_transform(self, X, y=None, **fit_params):
+    def fit(self, X):
         categorical_features = get_categorical_features(data=X)
 
         # preprocess ordinals
@@ -39,6 +39,23 @@ class MultiModelTransform(BaseEstimator, TransformerMixin):
         transformer_nominal.cols = gp_nominals
 
         groups = X.groupby(by=self.group_col)
+        for gp_key, group in groups:
+            x_group = group[self.selected_features[gp_key]]
+            # preprocessing
+            self.categorical_features[gp_key] = get_categorical_features(data=x_group,
+                                                                         potential_cat_feat=self.params[gp_key].get(
+                                                                             'potential_cat_feat', None))
+
+            # Set transformer for nominals
+            self.transformers_nominals.update({gp_key: transformer_nominal})
+
+            # Set transformer for ordinals
+            self.transformers_ordinals.update({gp_key: transformer_ordinal})
+
+        self.scaler = MinMaxScaler()
+
+    def transform(self, X, y=None):
+        groups = X.groupby(by=self.group_col)
         total_df = pd.DataFrame()
         for gp_key, group in groups:
             x_group = group[self.selected_features[gp_key]]
@@ -49,7 +66,6 @@ class MultiModelTransform(BaseEstimator, TransformerMixin):
                                                                              'potential_cat_feat', None))
 
             # preprocess nominals
-            self.transformers_nominals.update({gp_key: transformer_nominal})
             gp_transformer_nominals = self.transformers_nominals.get(gp_key)
             if gp_transformer_nominals:
                 gp_nominals = [feature for feature in self.categorical_features[gp_key] if feature in self.nominals]
@@ -57,7 +73,6 @@ class MultiModelTransform(BaseEstimator, TransformerMixin):
                 x_group = gp_transformer_nominals.fit_transform(x_group, y_in)
 
             # preprocess ordinals
-            self.transformers_ordinals.update({gp_key: transformer_ordinal})
             gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
             if gp_transformer_ordinals:
                 gp_ordinals = [feature for feature in self.categorical_features[gp_key] if feature in self.ordinals]
@@ -68,8 +83,7 @@ class MultiModelTransform(BaseEstimator, TransformerMixin):
 
         # Append transformed x_group objects to a total dataframe
         # Then transform total df with MinMaxScaler
-        scaler = MinMaxScaler()
-        x_group_transformed = scaler.fit_transform(total_df)
+        x_group_transformed = self.scaler.fit_transform(total_df)
 
         return x_group_transformed
 
