@@ -1,17 +1,16 @@
 import category_encoders as ce
 from sklearn.base import BaseEstimator, TransformerMixin
 
+POTENTIAL_TRANSFORMER = {
+    'OneHotEncoder': ce.OneHotEncoder,
+    'OrdinalEncoder': ce.OrdinalEncoder,
+    'TargetEncoder': ce.TargetEncoder,
+    'JamesSteinEncoder': ce.JamesSteinEncoder
+}
 
 def get_transformer(name):
-    potential_transformers = {
-        'OneHotEncoder': ce.OneHotEncoder,
-        'OrdinalEncoder': ce.OrdinalEncoder,
-        'TargetEncoder': ce.TargetEncoder,
-        'JamesSteinEncoder': ce.JamesSteinEncoder
-    }
-
     try:
-        output = potential_transformers[name]
+        output = POTENTIAL_TRANSFORMER[name]
         return output()
     except KeyError:
         print('KeyError: The "%s" is not a potential transformer. TargetEncoder is being returned' % str(name))
