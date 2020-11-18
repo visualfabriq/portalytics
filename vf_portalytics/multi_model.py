@@ -79,6 +79,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
         return self
 
     def predict(self, X, y=None):
+
         # single model
         if self.group_col not in X.columns:
             if not len(self.clusters) == 1:
