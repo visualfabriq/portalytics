@@ -1,12 +1,11 @@
 import pandas as pd
 import numpy as np
-import xgboost
+
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.dummy import DummyClassifier
-from functools import partial
 
-from vf_portalytics.tool import get_categorical_features, squared_error_objective_with_weighting
-from vf_portalytics.transformers import get_transformer
+from vf_portalytics.tool import get_categorical_features
+from vf_portalytics.ml_helpers import get_model, CustomTransformer
 
 
 class MultiModel(BaseEstimator, RegressorMixin):
@@ -15,13 +14,15 @@ class MultiModel(BaseEstimator, RegressorMixin):
                  selected_features=None, nominals=None, ordinals=None):
         """
         Build a model for each subset of rows matching particular category of features group_col.
-        Input:
-            group_col: string; name of the column that the groups exist
-            clusters: array; with the name of unique groups
-            params: dictionary with keys the group names and values dictionaries of the selected hyperparameters
-            selected_features: a dictionary with keys the cluster name and values list of selected features
-            nominals: list of the features (from all clusters) that are nominal
-            ordinals: list of the features (from all clusters) that are ordinal
+
+        Parameters:
+            group_col (string) name of the column that the groups exist
+            clusters (array): with the name of unique groups
+            params (dictionary of dictionaries):
+                the group names with dicts that include the selected  model_name and its hyperparameters
+            selected_features (dictionary): keys the cluster name and values list of selected features
+            nominals (list): features (from all clusters) that are nominal
+            ordinals (list): features (from all clusters) that are ordinal
         """
         self.group_col = group_col
         self.clusters = clusters
@@ -29,6 +30,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
         self.selected_features = selected_features
         self.nominals = nominals
         self.ordinals = ordinals
+
         self.categorical_features = dict()
         self.sub_models, self.transformers_nominals, self.transformers_ordinals = self.initiliaze_models()
 
@@ -36,8 +38,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
         """
         Partition the training data, X, into groups for each unique combination of values in
         'group_col' columns. For each group, train the appropriate model specified in 'sub_models'.
-        If there is no sub_model for a group, predict 0
-        The models are being trained using only the features that their names starts with 'promoted_price'
+
+        If there is no sub_model for a group, predict 0.
         """
         groups = X.groupby(by=self.group_col)
         for gp_key, group in groups:
@@ -90,7 +92,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
         results = []
         for gp_key, group in groups:
             x_group = group[self.selected_features.get(gp_key, group.columns)]
-            # preprocessing
+
             # nominals
             gp_transformer_nominals = self.transformers_nominals.get(gp_key)
             if gp_transformer_nominals:
@@ -121,23 +123,12 @@ class MultiModel(BaseEstimator, RegressorMixin):
         transformers_nominals = {}
         transformers_ordinals = {}
         for gp_key in self.clusters:
-            sub_models[gp_key] = xgboost.XGBRegressor(
-                n_estimators=self.params[gp_key].get('n_estimators', 100),
-                max_depth=self.params[gp_key].get('max_depth', 3),
-                subsample=self.params[gp_key].get('subsample', 1),
-                min_child_weight=self.params[gp_key].get('min_child_weight', 1),
-                gamma=self.params[gp_key].get('gamma', 0),
-                colsample_bytree=self.params[gp_key].get('colsample_bytree', 1),
-                objective=partial(squared_error_objective_with_weighting,
-                                  under_predict_weight=self.params[gp_key].get('under_predict_weight', 2.0)),
-                learning_rate=self.params[gp_key].get('learning_rate', 0.1),
-                silent=True
-            )
+            sub_models[gp_key] = get_model(self.params[gp_key])
             # nominals
             transformer_name = self.params[gp_key].get('transformer_nominal')
-            transformers_nominals.update({gp_key: get_transformer(transformer_name)})
+            transformers_nominals.update({gp_key: CustomTransformer(transformer_name)})
             # ordinals
             transformer_name = self.params[gp_key].get('transformer_ordinal')
-            transformers_ordinals.update({gp_key: get_transformer(transformer_name)})
+            transformers_ordinals.update({gp_key: CustomTransformer(transformer_name)})
 
         return sub_models, transformers_nominals, transformers_ordinals

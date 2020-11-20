@@ -72,14 +72,26 @@ def test_multi_model():
 
     # imitate params given from hyper optimization tuning
     params = {
-        'A': {'transformer_nominal': 'TargetEncoder',
-              'transformer_ordinal': 'OrdinalEncoder'},
-        'B': {'transformer_nominal': 'TargetEncoder',
-              'transformer_ordinal': 'OrdinalEncoder'},
-        'C': {'transformer_nominal': 'TargetEncoder',
-              'transformer_ordinal': 'OrdinalEncoder'},
-        'D': {'transformer_nominal': 'TargetEncoder',
-              'transformer_ordinal': 'OrdinalEncoder'},
+        'A': {
+            'model_name': 'XGBRegressor',
+            'transformer_nominal': 'TargetEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'
+        },
+        'B': {
+            'model_name': 'XGBRegressor',
+            'transformer_nominal': 'TargetEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'
+        },
+        'C': {
+            'model_name': 'XGBRegressor',
+            'transformer_nominal': 'TargetEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'
+        },
+        'D': {
+            'model_name': 'XGBRegressor',
+            'transformer_nominal': 'TargetEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'
+        },
     }
 
     # Initiliaze model
@@ -124,8 +136,10 @@ def test_multi_model_to_single_model():
 
     # imitate params given from hyper optimization tuning
     params = {
-        'group_0': {'transformer_nominal': 'TargetEncoder',
-              'transformer_ordinal': 'OrdinalEncoder'},
+        'group_0': {
+            'model_name': 'XGBRegressor',
+            'transformer_nominal': 'TargetEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'},
     }
 
 

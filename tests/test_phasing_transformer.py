@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 
-from vf_portalytics.transformers import PhasingTransformer
+from vf_portalytics.ml_helpers import CustomTransformer
 
 
 def test_prediction_model_categorical_features():
@@ -16,7 +16,7 @@ def test_prediction_model_categorical_features():
     train_x = pd.DataFrame(train_x)
     train_y = pd.DataFrame(train_y)
 
-    transformer = PhasingTransformer()
+    transformer = CustomTransformer()
     transformed_x = transformer.fit_transform(train_x, train_y)
 
     assert all(train_x['Var_2'] == transformed_x['Var_2'])
