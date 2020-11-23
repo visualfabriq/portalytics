@@ -149,7 +149,7 @@ def test_multi_model_to_single_model():
     model.fit(train_x, train_y)
     pred_test_y = model.predict(test_x)
     # check if we predicted with a model different than DummyClassifier
-    assert not (pred_test_y == 0).all()
+    assert not (pred_test_y == 0).all()[0]
 
 
 def test_multi_model_with_double_target():
@@ -184,21 +184,37 @@ def test_multi_model_with_double_target():
     params = {
         'A': {
             'model_name': 'ExtraTreesRegressor',
+            'max_depth': 2,
+            'min_samples_leaf': 400,
+            'min_samples_split': 400,
+            'n_estimators': 100,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         },
         'B': {
             'model_name': 'ExtraTreesRegressor',
+            'max_depth': 2,
+            'min_samples_leaf': 400,
+            'min_samples_split': 400,
+            'n_estimators': 100,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         },
         'C': {
             'model_name': 'ExtraTreesRegressor',
+            'max_depth': 2,
+            'min_samples_leaf': 400,
+            'min_samples_split': 400,
+            'n_estimators': 100,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         },
         'D': {
             'model_name': 'ExtraTreesRegressor',
+            'max_depth': 2,
+            'min_samples_leaf': 400,
+            'min_samples_split': 400,
+            'n_estimators': 200,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         },
@@ -211,3 +227,8 @@ def test_multi_model_with_double_target():
     pred_test_y = model.predict(test_x)
 
     assert pred_test_y.shape[1] == 2
+    assert model.sub_models['C'].n_estimators == 100
+    assert model.sub_models['D'].n_estimators == 200
+
+
+

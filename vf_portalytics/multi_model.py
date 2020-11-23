@@ -112,10 +112,10 @@ class MultiModel(BaseEstimator, RegressorMixin):
 
             # predict
             result = gp_model.predict(x_group)
-            result = pd.Series(index=x_group.index, data=result)
+            result = pd.DataFrame(index=x_group.index, data=result)
             results.append(result)
         results = pd.concat(results, axis=0)
-        results = pd.Series(index=X.index, data=results, name='predicted', dtype=np.float64)
+        results = pd.DataFrame(index=X.index, data=results, dtype=np.float64)
         return results
 
     def initiliaze_models(self):

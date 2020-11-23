@@ -1,3 +1,4 @@
+import inspect
 import xgboost
 import category_encoders as ce
 import pandas as pd
@@ -17,14 +18,16 @@ POTENTIAL_MODELS = {
     'ExtraTreesRegressor': ensemble.ExtraTreesRegressor,
 }
 
-def get_model(name='XGBRegressor', params={}):
+def get_model(params={}):
     try:
         model_name = params.get('model_name')
         fc_model = POTENTIAL_MODELS[model_name]
-        model = fc_model(**params)
+        initialized_params = {key: value for key, value in params.items()
+                              if key in inspect.getargspec(fc_model.__init__).args}
+        model = fc_model(**initialized_params)
         return model
     except KeyError:
-        print('KeyError: The "%s" is not a currently supported model. XGBRegressor is being used' % str(name))
+        print('KeyError: The "%s" is not a currently supported model. XGBRegressor is being used' % str(model_name))
         fc_model = POTENTIAL_MODELS['XGBRegressor']
         model = fc_model()
         return model
