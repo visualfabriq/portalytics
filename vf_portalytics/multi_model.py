@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 import numpy as np
 
@@ -7,6 +9,8 @@ from sklearn.dummy import DummyClassifier
 from vf_portalytics.tool import get_categorical_features
 from vf_portalytics.ml_helpers import get_model, CustomTransformer
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class MultiModel(BaseEstimator, RegressorMixin):
 
@@ -67,8 +71,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
             try:
                 gp_model = self.sub_models[gp_key]
             except KeyError:
-                print('There was no model initialized for category %s' % str(gp_key))
-                print('A Dummy Classifier was chosen')
+                logger.exception('There was no model initialized for category %s' % str(gp_key))
+                logger.exception('A Dummy Classifier was chosen')
                 gp_model = DummyClassifier(constant=0)
 
             # fit
@@ -106,8 +110,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
             try:
                 gp_model = self.sub_models[gp_key]
             except KeyError:
-                print('There was no model initialized for category %s' % str(gp_key))
-                print('A Dummy Classifier was chosen')
+                logger.exception('There was no model initialized for category %s' % str(gp_key))
+                logger.exception('A Dummy Classifier was chosen')
                 gp_model = DummyClassifier(constant=0).fit(x_group, [0] * len(x_group))
 
             # predict

@@ -1,10 +1,13 @@
 import inspect
+import logging
 import xgboost
 import category_encoders as ce
 import pandas as pd
 from sklearn import ensemble
 from sklearn.base import BaseEstimator, TransformerMixin
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 POTENTIAL_TRANSFORMER = {
     'OneHotEncoder': ce.OneHotEncoder,
@@ -18,7 +21,9 @@ POTENTIAL_MODELS = {
     'ExtraTreesRegressor': ensemble.ExtraTreesRegressor,
 }
 
-def get_model(params={}):
+def get_model(params):
+
+    params = params if params else {}
     try:
         model_name = params.get('model_name')
         fc_model = POTENTIAL_MODELS[model_name]
@@ -27,7 +32,8 @@ def get_model(params={}):
         model = fc_model(**initialized_params)
         return model
     except KeyError:
-        print('KeyError: The "%s" is not a currently supported model. XGBRegressor is being used' % str(model_name))
+        logger.exception("KeyError: The '%s ' is not a currently supported model. "
+                         "XGBRegressor is being used" % str(model_name))
         fc_model = POTENTIAL_MODELS['XGBRegressor']
         model = fc_model()
         return model
@@ -37,7 +43,7 @@ def get_transformer(name):
         output = POTENTIAL_TRANSFORMER[name]
         return output()
     except KeyError:
-        print('KeyError: The "%s" is not a potential transformer. TargetEncoder is being used' % str(name))
+        logger.exception("KeyError: The '%s' is not a potential transformer. TargetEncoder is being used" % str(name))
         return ce.TargetEncoder()
 
 
