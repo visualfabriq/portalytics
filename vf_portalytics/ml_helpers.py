@@ -1,4 +1,3 @@
-from inspect import signature
 import logging
 import xgboost
 import category_encoders as ce
@@ -28,7 +27,7 @@ def get_model(params):
         model_name = params.get('model_name')
         fc_model = POTENTIAL_MODELS[model_name]
         initialized_params = {key: value for key, value in params.items()
-                              if key in signature(fc_model.__init__).parameters}
+                              if key in fc_model._get_param_names()}
         model = fc_model(**initialized_params)
         return model
     except KeyError:
