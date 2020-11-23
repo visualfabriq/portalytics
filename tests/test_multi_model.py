@@ -150,3 +150,64 @@ def test_multi_model_to_single_model():
     pred_test_y = model.predict(test_x)
     # check if we predicted with a model different than DummyClassifier
     assert not (pred_test_y == 0).all()
+
+
+def test_multi_model_with_double_target():
+
+    n_features = 5
+    total_x, total_y = make_dataset()
+
+    # Declare basic parameters
+    target = 'target'
+    cat_feature = 'category'
+    feature_col_list = total_x.columns.drop(cat_feature)
+    clusters = total_x[cat_feature].unique()
+
+
+    # Split into train and test
+    train_index, test_index = train_test_split(total_x.index, test_size=0.33, random_state=5)
+    train_x, train_y = total_x.loc[train_index, :], total_y.loc[train_index]
+    test_x, test_y = total_x.loc[test_index, :], total_y.loc[test_index]
+
+    # make the target double
+    train_y = pd.DataFrame({'target_1': train_y, 'target_2': 2*train_y})
+    test_y = pd.DataFrame({'target_1': test_y, 'target_2': 2*test_y})
+
+    # keep all the features
+    selected_features = {}
+    for gp_key in clusters:
+        selected_features[gp_key] = feature_col_list
+    nominal_features = ['feature_0']
+    ordinal_features = ['feature_1']
+
+    # imitate params given from hyper optimization tuning
+    params = {
+        'A': {
+            'model_name': 'ExtraTreesRegressor',
+            'transformer_nominal': 'TargetEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'
+        },
+        'B': {
+            'model_name': 'ExtraTreesRegressor',
+            'transformer_nominal': 'TargetEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'
+        },
+        'C': {
+            'model_name': 'ExtraTreesRegressor',
+            'transformer_nominal': 'TargetEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'
+        },
+        'D': {
+            'model_name': 'ExtraTreesRegressor',
+            'transformer_nominal': 'TargetEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'
+        },
+    }
+
+    # Initiliaze model
+    model = MultiModel(group_col=cat_feature, clusters=clusters, params=params,
+                       selected_features=selected_features, nominals=nominal_features, ordinals=ordinal_features)
+    model.fit(train_x, train_y)
+    pred_test_y = model.predict(test_x)
+
+    assert pred_test_y.shape[1] == 2
