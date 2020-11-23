@@ -1,4 +1,4 @@
-import inspect
+from inspect import signature
 import logging
 import xgboost
 import category_encoders as ce
@@ -21,14 +21,14 @@ POTENTIAL_MODELS = {
     'ExtraTreesRegressor': ensemble.ExtraTreesRegressor,
 }
 
-def get_model(params):
 
+def get_model(params):
     params = params if params else {}
     try:
         model_name = params.get('model_name')
         fc_model = POTENTIAL_MODELS[model_name]
         initialized_params = {key: value for key, value in params.items()
-                              if key in inspect.getargspec(fc_model.__init__).args}
+                              if key in signature(fc_model.__init__).parameters}
         model = fc_model(**initialized_params)
         return model
     except KeyError:
@@ -37,6 +37,7 @@ def get_model(params):
         fc_model = POTENTIAL_MODELS['XGBRegressor']
         model = fc_model()
         return model
+
 
 def get_transformer(name):
     try:
@@ -48,10 +49,9 @@ def get_transformer(name):
 
 
 class CustomTransformer(BaseEstimator, TransformerMixin):
-    """
-    A custom transformer that supports multiple targets
-    by using only the first target as input in the selected transformer.
-    """
+    """A custom transformer that supports multiple targets by using only the first target as input in the selected
+    transformer. """
+
     def __init__(self, transformer='TargetEncoder'):
         self.transformer = get_transformer(transformer)
 
