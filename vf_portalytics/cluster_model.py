@@ -210,6 +210,29 @@ class ClusterModel(BaseEstimator, RegressorMixin):
         return pd.concat(results, axis=0).loc[X.index]
 
 
+class ClusterSubModel:
+    def __init__(self, model):
+        """
+        :param model: Model to set max- and min values on
+        :param max_value: Maximum value the model should predict
+        :param min_value: Minimum value the model should predict
+        """
+        self.model = model
+        self.max_value = None
+        self.min_value = None
+
+    def fit(self, X, y):
+        self.max_value = np.array(y).max()
+        self.min_value = np.array(y).min()
+
+        self.model.fit(X, y)
+
+        return self
+
+    def predict(self, X):
+        return self.model.predict(X).clip(min=self.min_value, max=self.max_value)
+
+
 class PriceElasticityModel(BaseEstimator, RegressorMixin):
     sub_model = None
     price_column = None
