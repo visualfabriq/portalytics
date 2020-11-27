@@ -212,6 +212,11 @@ class ClusterModel(BaseEstimator, RegressorMixin):
 
 class ClusterSubModel:
     def __init__(self, model):
+        """
+        :param model: Model to set max- and min values on
+        :param max_value: Maximum value the model should predict
+        :param min_value: Minimum value the model should predict
+        """
         self.model = model
         self.max_value = None
         self.min_value = None
