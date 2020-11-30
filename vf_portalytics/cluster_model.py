@@ -210,7 +210,7 @@ class ClusterModel(BaseEstimator, RegressorMixin):
         return pd.concat(results, axis=0).loc[X.index]
 
 
-class ClusterSubModel:
+class ClusterSubModel(BaseEstimator, RegressorMixin):
     def __init__(self, model):
         """
         :param model: Model to set max- and min values on
