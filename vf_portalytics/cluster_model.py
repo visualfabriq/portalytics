@@ -183,7 +183,7 @@ class ClusterModel(BaseEstimator, RegressorMixin):
 
                     # Multiply by seasonality
                     if self.seasonality_dict is not None:
-                        predictions *= seasonality_values.loc[x_in.index].values
+                        predictions *= seasonality_values.loc[x_in.index].values.reshape(-1)
 
                     # Multiply by multiplication columns
                     for mul_col in self.multiplication_columns:
