@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 import numpy as np
 
-from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.dummy import DummyClassifier
 
 from vf_portalytics.tool import get_categorical_features
@@ -38,6 +38,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
         self.categorical_features = dict()
         self.sub_models, self.transformers_nominals, self.transformers_ordinals = self.initiliaze_models()
 
+        self.multi_transformer = None
+
     def fit(self, X, y=None):
         """
         Partition the training data, X, into groups for each unique combination of values in
@@ -45,28 +47,17 @@ class MultiModel(BaseEstimator, RegressorMixin):
 
         If there is no sub_model for a group, predict 0.
         """
-        groups = X.groupby(by=self.group_col)
-        for gp_key, group in groups:
-            x_group = group[self.selected_features[gp_key]]
+        # preprocessing
+        self.multi_transformer = MultiTransformer(self.group_col,
+                                                  self.selected_features,
+                                                  self.transformers_nominals,
+                                                  self.transformers_ordinals)
+        transformed_x = self.multi_transformer.fit_transform(X, y)
+        del X
+
+        groups = transformed_x.groupby(by=self.group_col)
+        for gp_key, x_group in groups:
             y_in = y.loc[x_group.index]
-            # preprocessing
-            self.categorical_features[gp_key] = get_categorical_features(data=x_group,
-                                                                         potential_cat_feat=self.params[gp_key].get(
-                                                                             'potential_cat_feat', None))
-            # preprocess nominals
-            gp_transformer_nominals = self.transformers_nominals.get(gp_key)
-            if gp_transformer_nominals:
-                gp_nominals = [feature for feature in self.categorical_features[gp_key] if feature in self.nominals]
-                gp_transformer_nominals.cols = gp_nominals
-                x_group = gp_transformer_nominals.fit_transform(x_group, y_in)
-
-            # preprocess ordinals
-            gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
-            if gp_transformer_ordinals:
-                gp_ordinals = [feature for feature in self.categorical_features[gp_key] if feature in self.ordinals]
-                gp_transformer_ordinals.cols = gp_ordinals
-                x_group = gp_transformer_ordinals.fit_transform(x_group, y_in)
-
             # Find the sub-model for this group key
             try:
                 gp_model = self.sub_models[gp_key]
@@ -74,13 +65,10 @@ class MultiModel(BaseEstimator, RegressorMixin):
                 logger.exception('There was no model initialized for category %s' % str(gp_key))
                 logger.exception('A Dummy Classifier was chosen')
                 gp_model = DummyClassifier(constant=0)
-
             # fit
             gp_model = gp_model.fit(X=x_group, y=y_in.values)
 
             self.sub_models[gp_key] = gp_model
-            self.transformers_nominals[gp_key] = gp_transformer_nominals
-            self.transformers_ordinals[gp_key] = gp_transformer_ordinals
             print('Model for %s trained' % str(gp_key))
         return self
 
@@ -92,20 +80,10 @@ class MultiModel(BaseEstimator, RegressorMixin):
                 raise AssertionError('The features that indicates categories in trainset do not exist in new data')
             X[self.group_col] = self.clusters[0]
 
-        groups = X.groupby(by=self.group_col)
+        transformed_x = self.multi_transformer.transform(X, y)
+        groups = transformed_x.groupby(by=self.group_col)
         results = []
-        for gp_key, group in groups:
-            x_group = group[self.selected_features.get(gp_key, group.columns)]
-
-            # nominals
-            gp_transformer_nominals = self.transformers_nominals.get(gp_key)
-            if gp_transformer_nominals:
-                x_group = gp_transformer_nominals.transform(x_group)
-            # ordinals
-            gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
-            if gp_transformer_ordinals:
-                x_group = gp_transformer_ordinals.transform(x_group)
-
+        for gp_key, x_group in groups:
             # Find the sub-model for this group key and fit
             try:
                 gp_model = self.sub_models[gp_key]
@@ -136,3 +114,78 @@ class MultiModel(BaseEstimator, RegressorMixin):
             transformers_ordinals.update({gp_key: CustomTransformer(transformer_name)})
 
         return sub_models, transformers_nominals, transformers_ordinals
+
+
+class MultiTransformer(BaseEstimator, TransformerMixin):
+
+    def __init__(self, group_col, selected_features, transformers_nominals, transformers_ordinals):
+        """
+        Build a transformer for each subset of rows matching particular category of features group_col.
+
+        Parameters:
+            group_col (string) name of the column that the groups exist
+            selected_features (dictionary): keys the cluster name and values list of selected features
+            transformers_nominals (dictionary): features (from all clusters) that are nominal
+            transformers_ordinals (dictionary): features (from all clusters) that are ordinal
+        """
+        self.group_col = group_col
+        self.selected_features = selected_features
+        self.transformers_nominals = transformers_nominals
+        self.transformers_ordinals = transformers_ordinals
+
+
+    def fit(self, X, y=None):
+        """
+        Partition the training data, X, into groups for each unique combination of values in
+        'group_col' columns. For each group, train the appropriate transformer specified in
+        transformers_nominals or in transformers_ordinals .
+        """
+        groups = X.groupby(by=self.group_col)
+        for gp_key, group in groups:
+            x_group = group[self.selected_features[gp_key]]
+            y_in = y.loc[x_group.index]
+            # preprocessing
+            self.categorical_features[gp_key] = get_categorical_features(data=x_group,
+                                                                         potential_cat_feat=self.params[gp_key].get(
+                                                                             'potential_cat_feat', None))
+            # preprocess nominals
+            gp_transformer_nominals = self.transformers_nominals.get(gp_key)
+            if gp_transformer_nominals:
+                gp_nominals = [feature for feature in self.categorical_features[gp_key] if feature in self.nominals]
+                gp_transformer_nominals.cols = gp_nominals
+                gp_transformer_nominals.fit(x_group, y_in)
+
+            # preprocess ordinals
+            gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
+            if gp_transformer_ordinals:
+                gp_ordinals = [feature for feature in self.categorical_features[gp_key] if feature in self.ordinals]
+                gp_transformer_ordinals.cols = gp_ordinals
+                gp_transformer_ordinals.fit(x_group, y_in)
+
+
+            self.transformers_nominals[gp_key] = gp_transformer_nominals
+            self.transformers_ordinals[gp_key] = gp_transformer_ordinals
+            print('Transformer for %s fitted' % str(gp_key))
+        return self
+
+
+    def transform(self, X, y=None):
+
+        groups = X.groupby(by=self.group_col)
+        transformed_x = pd.DataFrame()
+
+        for gp_key, group in groups:
+            x_group = group[self.selected_features.get(gp_key, group.columns)]
+            # preprocessing
+            # nominals
+            gp_transformer_nominals = self.transformers_nominals.get(gp_key)
+            if gp_transformer_nominals:
+                transformed_x_group = gp_transformer_nominals.transform(x_group)
+            # ordinals
+            gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
+            if gp_transformer_ordinals:
+                transformed_x_group = gp_transformer_ordinals.transform(x_group)
+
+            transformed_x = transformed_x.append(transformed_x_group)
+
+        return transformed_x
