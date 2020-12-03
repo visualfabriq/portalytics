@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split
 
-from vf_portalytics.multi_model import MultiModel
+from vf_portalytics.multi_model import MultiModel, MultiTransformer
 
 
 def make_regression_dataset(n_samples, n_features, n_informative, **kwargs):
@@ -231,4 +231,56 @@ def test_multi_model_with_double_target():
     assert model.sub_models['D'].n_estimators == 200
 
 
+def test_multi_transformer():
+    total_x, total_y = make_dataset()
 
+    # Declare basic parameters
+    target = 'target'
+    cat_feature = 'category'
+    feature_col_list = total_x.columns.drop(cat_feature)
+    clusters = total_x[cat_feature].unique()
+
+    # Split into train and test
+    train_index, test_index = train_test_split(total_x.index, test_size=0.33, random_state=5)
+    train_x, train_y = total_x.loc[train_index, :], total_y.loc[train_index]
+    test_x, test_y = total_x.loc[test_index, :], total_y.loc[test_index]
+
+    # keep all the features
+    selected_features = {}
+    for gp_key in clusters:
+        selected_features[gp_key] = feature_col_list
+    nominal_features = ['feature_0']
+    ordinal_features = ['feature_1']
+
+    # imitate params given from hyper optimization tuning
+    params = {
+        'A': {
+            'transformer_nominal': 'TargetEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'
+        },
+        'B': {
+            'transformer_nominal': 'OneHotEncoder',
+            'transformer_ordinal': 'TargetEncoder'
+        },
+        'C': {
+            'transformer_nominal': 'OneHotEncoder',
+            'transformer_ordinal': 'JamesSteinEncoder'
+        },
+        'D': {
+            'transformer_nominal': 'JamesSteinEncoder',
+            'transformer_ordinal': 'OrdinalEncoder'
+        },
+    }
+
+    # Initiliaze transformer
+    transformer = MultiTransformer(cat_feature, clusters, selected_features, nominal_features, ordinal_features, params)
+    transformer.fit(train_x, train_y)
+    transformed_test_x = transformer.transform(test_x)
+
+    # check shapes
+    assert test_x.shape[0] == transformed_test_x.shape[0]
+    assert transformed_test_x.shape[1] == 11
+
+    # check if OneHotEncoder did what expected
+    transformed_test_x = transformed_test_x.reindex(test_x.index)
+    assert (transformed_test_x['feature_0_1'].isna() == test_x[cat_feature].isin(['A', 'D'])).all()

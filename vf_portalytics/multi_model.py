@@ -20,13 +20,27 @@ class MultiModel(BaseEstimator, RegressorMixin):
         Build a model for each subset of rows matching particular category of features group_col.
 
         Parameters:
-            group_col (string) name of the column that the groups exist
-            clusters (array): with the name of unique groups
-            params (dictionary of dictionaries):
-                the group names with dicts that include the selected  model_name and its hyperparameters
-            selected_features (dictionary): keys the cluster name and values list of selected features
-            nominals (list): features (from all clusters) that are nominal
-            ordinals (list): features (from all clusters) that are ordinal
+            group_col: string
+                name of the column that the groups exist
+            clusters: array
+                the name of unique groups
+            params: dictionary of dictionaries
+                the group names with dicts that include the selected  model_name, its hyperparameters,
+                transformer names to be used.
+                Example
+                -------
+                {'A': {
+                        'model_name': 'XGBRegressor',
+                        'transformer_nominal': 'TargetEncoder',
+                        'transformer_ordinal': 'OrdinalEncoder'
+                    }
+                }
+            selected_features: dictionary
+                keys the cluster name and values list of selected features
+            nominals: list
+                features (from all clusters) that are nominal
+            ordinals: list
+                features (from all clusters) that are ordinal
         """
         self.group_col = group_col
         self.clusters = clusters
@@ -35,9 +49,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
         self.nominals = nominals
         self.ordinals = ordinals
 
-        self.categorical_features = dict()
-        self.sub_models, self.transformers_nominals, self.transformers_ordinals = self.initiliaze_models()
-
+        self.sub_models = self.initiliaze_models()
         self.multi_transformer = None
 
     def fit(self, X, y=None):
@@ -48,15 +60,15 @@ class MultiModel(BaseEstimator, RegressorMixin):
         If there is no sub_model for a group, predict 0.
         """
         # preprocessing
-        self.multi_transformer = MultiTransformer(self.group_col,
-                                                  self.selected_features,
-                                                  self.transformers_nominals,
-                                                  self.transformers_ordinals)
+        self.multi_transformer = MultiTransformer(self.group_col, self.clusters,
+                                                  self.selected_features, self.nominals, self.ordinals, self.params)
         transformed_x = self.multi_transformer.fit_transform(X, y)
+        transformed_x[self.group_col] = X[self.group_col]
         del X
 
         groups = transformed_x.groupby(by=self.group_col)
         for gp_key, x_group in groups:
+            x_group = x_group.drop(columns=[self.group_col])
             y_in = y.loc[x_group.index]
             # Find the sub-model for this group key
             try:
@@ -81,9 +93,15 @@ class MultiModel(BaseEstimator, RegressorMixin):
             X[self.group_col] = self.clusters[0]
 
         transformed_x = self.multi_transformer.transform(X, y)
+        transformed_x[self.group_col] = X[self.group_col]
+        transformed_x = transformed_x.reindex(X.index)
+        del X
+
         groups = transformed_x.groupby(by=self.group_col)
         results = []
         for gp_key, x_group in groups:
+            x_group = x_group.drop(columns=[self.group_col])
+
             # Find the sub-model for this group key and fit
             try:
                 gp_model = self.sub_models[gp_key]
@@ -97,42 +115,55 @@ class MultiModel(BaseEstimator, RegressorMixin):
             result = pd.DataFrame(index=x_group.index, data=result)
             results.append(result)
         results = pd.concat(results, axis=0)
-        results = pd.DataFrame(index=X.index, data=results, dtype=np.float64)
+        results = pd.DataFrame(index=transformed_x.index, data=results, dtype=np.float64)
         return results
 
     def initiliaze_models(self):
         sub_models = {}
-        transformers_nominals = {}
-        transformers_ordinals = {}
         for gp_key in self.clusters:
             sub_models[gp_key] = get_model(self.params[gp_key])
-            # nominals
-            transformer_name = self.params[gp_key].get('transformer_nominal')
-            transformers_nominals.update({gp_key: CustomTransformer(transformer_name)})
-            # ordinals
-            transformer_name = self.params[gp_key].get('transformer_ordinal')
-            transformers_ordinals.update({gp_key: CustomTransformer(transformer_name)})
-
-        return sub_models, transformers_nominals, transformers_ordinals
+        return sub_models
 
 
 class MultiTransformer(BaseEstimator, TransformerMixin):
 
-    def __init__(self, group_col, selected_features, transformers_nominals, transformers_ordinals):
+    def __init__(self, group_col,  clusters, selected_features, nominals, ordinals, params):
         """
         Build a transformer for each subset of rows matching particular category of features group_col.
 
         Parameters:
-            group_col (string) name of the column that the groups exist
-            selected_features (dictionary): keys the cluster name and values list of selected features
-            transformers_nominals (dictionary): features (from all clusters) that are nominal
-            transformers_ordinals (dictionary): features (from all clusters) that are ordinal
+            group_col: string
+                name of the column that the groups exist
+            clusters: array:
+                the name of unique groups
+            selected_features: dictionary
+                keys the cluster name and values list of selected features
+            nominals: list
+                features (from all clusters) that are nominal
+            ordinals: list
+                features (from all clusters) that are ordinal
+            params: dictionary of dictionaries
+                the group names with dicts that include the selected  model_name, its hyperparameters,
+                transformer names to be used.
+                Example
+                -------
+                {'A': {
+                        'transformer_nominal': 'TargetEncoder',
+                        'transformer_ordinal': 'OrdinalEncoder'
+                    }
+                }
         """
         self.group_col = group_col
+        self.clusters = clusters
         self.selected_features = selected_features
-        self.transformers_nominals = transformers_nominals
-        self.transformers_ordinals = transformers_ordinals
+        self.nominals = nominals
+        self.ordinals = ordinals
+        self.params = params
 
+        self.categorical_features = dict()
+        self.transformers_nominals = None
+        self.transformers_ordinals = None
+        self.transformers_nominals, self.transformers_ordinals = self.initiliaze_transformers()
 
     def fit(self, X, y=None):
         """
@@ -153,7 +184,8 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
             if gp_transformer_nominals:
                 gp_nominals = [feature for feature in self.categorical_features[gp_key] if feature in self.nominals]
                 gp_transformer_nominals.cols = gp_nominals
-                gp_transformer_nominals.fit(x_group, y_in)
+                # its transformed because if OneHotEncoder, next transformer needs equal feature size when transforming
+                x_group = gp_transformer_nominals.fit_transform(x_group, y_in)
 
             # preprocess ordinals
             gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
@@ -161,7 +193,6 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
                 gp_ordinals = [feature for feature in self.categorical_features[gp_key] if feature in self.ordinals]
                 gp_transformer_ordinals.cols = gp_ordinals
                 gp_transformer_ordinals.fit(x_group, y_in)
-
 
             self.transformers_nominals[gp_key] = gp_transformer_nominals
             self.transformers_ordinals[gp_key] = gp_transformer_ordinals
@@ -180,12 +211,26 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
             # nominals
             gp_transformer_nominals = self.transformers_nominals.get(gp_key)
             if gp_transformer_nominals:
-                transformed_x_group = gp_transformer_nominals.transform(x_group)
+                x_group = gp_transformer_nominals.transform(x_group)
             # ordinals
             gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
             if gp_transformer_ordinals:
-                transformed_x_group = gp_transformer_ordinals.transform(x_group)
+                x_group = gp_transformer_ordinals.transform(x_group)
 
-            transformed_x = transformed_x.append(transformed_x_group)
+            transformed_x = transformed_x.append(x_group)
 
         return transformed_x
+
+    def initiliaze_transformers(self):
+        transformers_nominals = {}
+        transformers_ordinals = {}
+        for gp_key in self.clusters:
+
+            # nominals
+            transformer_name = self.params[gp_key].get('transformer_nominal')
+            transformers_nominals.update({gp_key: CustomTransformer(transformer_name)})
+            # ordinals
+            transformer_name = self.params[gp_key].get('transformer_ordinal')
+            transformers_ordinals.update({gp_key: CustomTransformer(transformer_name)})
+
+        return transformers_nominals, transformers_ordinals
