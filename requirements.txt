@@ -13,7 +13,7 @@ scipy==1.2.3; python_version <= '2.7'
 scipy>=1.5.2; python_version > '3.3'
 category-encoders==2.2.2
 # draw libraries
-matplotlib<=2.2.4; python_version <= '2.7'
+matplotlib<=2.2.5; python_version <= '2.7'
 matplotlib>=3.1.2; python_version > '3.3'
 seaborn==0.9.1; python_version <= '2.7'
 seaborn>=0.10.1; python_version > '3.3'
