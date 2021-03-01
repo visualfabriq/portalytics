@@ -12,8 +12,8 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
                  multiplication_dicts=None,
                  clustering_keys=None,
                  input_columns=None,
-                 multiplication_columns=[],
-                 division_columns=[],
+                 multiplication_columns=None,
+                 division_columns=None,
                  sub_models=None,
                  min_observations_per_cluster=5,
                  price_column="promoted_price",
@@ -60,8 +60,8 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
         self.multiplication_dicts = multiplication_dicts if multiplication_dicts else dict()
         self.clustering_key_column_sets = clustering_keys
         self.input_columns = input_columns
-        self.multiplication_columns = multiplication_columns
-        self.division_columns = division_columns
+        self.multiplication_columns = multiplication_columns if multiplication_columns else []
+        self.division_columns = division_columns if division_columns else []
         self.sub_models = sub_models
         self.min_observations_per_cluster = min_observations_per_cluster
         self.nr_target_variables = 1
