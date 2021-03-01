@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 class LightWeightClusterModel(BaseEstimator, RegressorMixin):
 
     def __init__(self,
-                 multiplication_dicts=dict(),
+                 multiplication_dicts=None,
                  clustering_keys=None,
                  input_columns=None,
                  multiplication_columns=[],
@@ -19,6 +19,7 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
                  price_column="promoted_price",
                  base_price_column="base_price",
                  baseline_column="baseline_units"):
+
         """
         A lightweight cluster model is less flexible than a ClusterModel, but much faster.
         For every sub_model in sub_models, you can specify the type of model. Currently, we support:
@@ -56,7 +57,7 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
         baseline_column : str | "baseline_units"
             The name of the column used for the baseline units.
         """
-        self.multiplication_dicts = multiplication_dicts
+        self.multiplication_dicts = multiplication_dicts if multiplication_dicts else dict()
         self.clustering_key_column_sets = clustering_keys
         self.input_columns = input_columns
         self.multiplication_columns = multiplication_columns
@@ -163,8 +164,8 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
                     continue
 
                 if "coef" in sub_model:
-                    predictions = pd.Series(self.predict_lw_regression_model(sub_model, x_in[self.input_columns]),
-                                            index=x_in.index)
+                    predictions = pd.Series(LightWeightClusterModel.predict_lw_regression_model(
+                        sub_model, x_in[self.input_columns]), index=x_in.index)
                 elif "price_elasticity_coef" in sub_model:
                     predictions = self.predict_price_elasticity_model(sub_model, x_in)
                 else:
@@ -197,7 +198,8 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
 
         return results
 
-    def predict_lw_regression_model(self, model, selected_columns):
+    @staticmethod
+    def predict_lw_regression_model(model, selected_columns):
         return (model["coef"] * selected_columns + model["intercept"]).values.reshape(-1)
 
     def predict_price_elasticity_model(self, model, X):
