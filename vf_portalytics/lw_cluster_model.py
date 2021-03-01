@@ -1,5 +1,4 @@
 import numpy as np
-
 import pandas as pd
 
 from collections import defaultdict
@@ -11,7 +10,6 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
 
     def __init__(self,
                  multiplication_dicts=dict(),
-                 multiplication_key_columns=[],
                  clustering_keys=None,
                  input_columns=None,
                  multiplication_columns=[],
@@ -29,9 +27,9 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
         Parameters
         ----------
         multiplication_dicts : dict | None
-            A dictionary of dictionaries to specify the amount each row needs to be multiplied by during prediction, and divided
-            during training. These can be used to model trends and/or seasonality for example. The key of the first level shall
-            contain the name of the columns to group by, and the key of the second level the values.
+            A dictionary of dictionaries to specify the amount each row needs to be multiplied by during prediction, and
+            divided during training. These can be used to model trends and/or seasonality for example. The key of the
+            first level shall contain the name of the columns to group by, and the key of the second level the values.
         clustering_keys : str[][]
             An ordered list of lists of column names that are to be used in the clustering. Items that are earlier in
             the list take preference over those later in the list.
@@ -79,24 +77,33 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
 
         If there is no model for a group, predict -1.
 
-        The models are being trained using only the features that are available in self.input_columns.
-        """
-
+        The models are being trained using only the features that are available in self.input_columns."""
         fitted_indices = pd.Series()
+
         if hasattr(y, "iloc"):
             if hasattr(y.iloc[0], "__len__"):
                 self.nr_target_variables = len(y.iloc[0])
-
         elif hasattr(y[0], "__len__"):
             self.nr_target_variables = len(y[0])
+
+        # During training, we switch multiplication and division around,
+        # so we multiply by the division_columns
+        for div_col in self.division_columns:
+            y = y.mul(X[div_col], axis=0)
+
+        # During training, we switch multiplication and division around,
+        # so we divide by the multiplication_columns
+        for mul_col in self.multiplication_columns:
+            y = y.div(X[mul_col], axis=0)
 
         for clustering_key_column_set in self.clustering_key_column_sets:
             # We only take records into account that have not previously been used in a model yet
             clusters = X[~X.index.isin(fitted_indices)].groupby(by=list(clustering_key_column_set))
-            for clustering_key, x_in in clusters:
 
+            for clustering_key, x_in in clusters:
                 if len(x_in) < self.min_observations_per_cluster:
                     continue
+
                 if "Unknown" in clustering_key:
                     continue
 
@@ -110,58 +117,44 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
                     continue
 
                 y_in = y.loc[x_in.index]
+
                 for clustering_columns, multiplication_dict in self.multiplication_dicts.items():
                     for multiplication_key, values in x_in.groupby(list(clustering_columns)):
                         # During training, we divide by the multiplication_dict values
                         y_in.loc[values.index] /= multiplication_dict[multiplication_key]
 
-                # During training, we switch multiplication and division around,
-                # so we multiply by the division_columns
-                for div_col in self.division_columns:
-                    y_in *= x_in.loc[x_in.index][div_col].values
-
-                # During training, we switch multiplication and division around,
-                # so we divide by the multiplication_columns
-                for mul_col in self.multiplication_columns:
-                    # During training, we switch multiplication and division around
-                    y_in /= x_in.loc[x_in.index][mul_col].values
-
                 if not isinstance(cluster_model, LinearRegression):
                     raise AssertionError(
-                        f"Unsupported model type for LightWeightClusterModel: {type(cluster_model)} for "
-                        f"clustering key {clustering_key}. Use ClusterModel instead, or switch the sub-model "
+                        "Unsupported model type for LightWeightClusterModel: {} for ".format(type(cluster_model)) +
+                        "clustering key {}. Use ClusterModel instead, or switch the sub-model ".format(clustering_key) +
                         "to a LinearRegression model.")
 
                 # Fit the sub-model with subset of rows
                 try:
                     cluster_model = cluster_model.fit(X=x_in[self.input_columns], y=y_in.values)
-                    cluster_model = {"coef": cluster_model.coef_,
-                                     "intercept": cluster_model.intercept_}
-                    self.sub_models[clustering_key_column_set][clustering_key] = cluster_model
-                    fitted_indices.append(pd.Series(x_in.index))
+                    cluster_model = {"coef": cluster_model.coef_, "intercept": cluster_model.intercept_}
 
+                    self.sub_models[clustering_key_column_set][clustering_key] = cluster_model
+
+                    fitted_indices.append(pd.Series(x_in.index))
                 except Exception as e:
                     print("Unable to train model for clustering key {}. Check if your data ".format(clustering_key) +
                           "contains zeroes in the multiplication columns for example:", e)
+
         return self
 
     def predict(self, X):
-        """
-        Same as 'self.fit()', but call the 'predict()' method for each submodel and return the results.
-
-        Returns
-        -------
-        The predicted values, multiplied by the self.multiplication_columns and divided by the self.division_columns.
-        Also multiplied by the seasonality_values, if applicable.
-        """
-        results = []
         scored_record_indices = set()
+        results = []
+
         for clustering_key_column_set in self.clustering_key_column_sets:
             # We only score records that have not been scored yet.
             clusters = X[~X.index.isin(scored_record_indices)].groupby(by=list(clustering_key_column_set))
+
             for clustering_key, x_in in clusters:
                 if "Unknown" in clustering_key:
                     continue
+
                 if clustering_key in self.sub_models[clustering_key_column_set]:
                     # Do not change this to .get() with a default value: this breaks functionality for defaultdicts
                     sub_model = self.sub_models[clustering_key_column_set][clustering_key]
@@ -169,34 +162,40 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
                     # No model found, try next clustering approach
                     continue
 
-                try:
+                if "coef" in sub_model:
                     predictions = pd.Series(self.predict_lw_regression_model(sub_model, x_in[self.input_columns]),
                                             index=x_in.index)
-                except (KeyError, Exception):
-                    # ALlow for fallback models, like the PriceElasticityModel.
-                    # In that case, pass on all variables to the model, and don't
-                    # do any post-processing on the results.
+                elif "price_elasticity_coef" in sub_model:
                     predictions = self.predict_price_elasticity_model(sub_model, x_in)
-                for clustering_columns, multiplication_dict in self.multiplication_dicts.items():
-                    for multiplication_key, values in x_in.groupby(list(clustering_columns)):
-                        predictions.loc[values.index] *= multiplication_dict[multiplication_key]
-
-                # Multiply by multiplication columns
-                for mul_col in self.multiplication_columns:
-                    predictions *= x_in.loc[x_in.index][mul_col].values
-                # Divide by multiplication columns
-                for div_col in self.division_columns:
-                    predictions /= x_in.loc[x_in.index][div_col].values
+                else:
+                    raise AssertionError("Unsupported model: {}".format(sub_model))
 
                 scored_record_indices |= set(x_in.index)
                 results.append(pd.DataFrame(predictions, index=x_in.index).clip(lower=0))
 
+        if len(results) > 0:
+            results = pd.concat(results, axis=0).loc[X.index]
+        else:
+            results = pd.DataFrame(columns=[i for i in range(self.nr_target_variables)])
+
+        for clustering_columns, multiplication_dict in self.multiplication_dicts.items():
+            results *= X.loc[results.index][list(clustering_columns)].apply(lambda x:
+                                                                            multiplication_dict.get(tuple(x), 1),
+                                                                            axis=1).values.reshape(-1, 1)
+
+        # Multiply by multiplication columns
+        for mul_col in self.multiplication_columns:
+            results = results.mul(X[mul_col], axis=0)
+
+        # Divide by multiplication columns
+        for div_col in self.division_columns:
+            results = results.div(X[div_col], axis=0)
+
         # Predict -1 for the rest
         indices_to_score = X[~X.index.isin(scored_record_indices)].index
-        results.append(pd.DataFrame(-np.ones(self.nr_target_variables * len(indices_to_score))
-                                    .reshape(len(indices_to_score), self.nr_target_variables),
-                                    index=indices_to_score))
-        return pd.concat(results, axis=0).loc[X.index]
+        results.loc[indices_to_score] = -1
+
+        return results
 
     def predict_lw_regression_model(self, model, selected_columns):
         return (model["coef"] * selected_columns + model["intercept"]).values.reshape(-1)
