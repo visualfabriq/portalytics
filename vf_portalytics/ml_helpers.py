@@ -66,3 +66,31 @@ class CustomTransformer(BaseEstimator, TransformerMixin):
             return self.transformer.transform(X, y)
         else:
             return self.transformer.transform(X, y.iloc[:, 0])
+
+
+class AccountClusterTransformer(BaseEstimator, TransformerMixin):
+    """A custom transformer that could use a list of accounts to create clusters"""
+
+    def __init__(self, cat_feature=None):
+        self.cat_feature = cat_feature
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        if 'cluster' not in X.columns:
+            if self.cat_feature == 'vf_category' or self.cat_feature is None:
+                # vf_category means that no category defined
+                X['cluster'] = 0.0
+            elif isinstance(self.cat_feature, (unicode, str)):
+                # category is a feature
+                X['cluster'] = X[self.cat_feature]
+            elif isinstance(self.cat_feature, list):
+                cluster_map = dict()
+                for account in X['account_banner'].unique():
+                    if account in self.cat_feature:
+                        cluster_map[account] = account
+                    else:
+                        cluster_map[account] = 'general_cluster'
+                X['cluster'] = X['account_banner'].replace(cluster_map)
+        return X
