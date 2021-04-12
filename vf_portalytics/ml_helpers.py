@@ -48,8 +48,11 @@ def get_transformer(name):
 
 
 class CustomTransformer(BaseEstimator, TransformerMixin):
-    """A custom transformer that supports multiple targets by using only the first target as input in the selected
-    transformer. """
+
+    """
+    A custom transformer that supports multiple targets by using only the first target as input in the selected
+    transformer. 
+    """
 
     def __init__(self, transformer='TargetEncoder'):
         self.transformer = get_transformer(transformer)
@@ -79,24 +82,6 @@ class AccountClusterTransformer(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         return self
-
-    # def transform(self, X):
-    #     if 'cluster' not in X.columns:
-    #         if self.cat_feature == 'vf_category' or self.cat_feature is None:
-    #             # vf_category means that no category defined
-    #             X['cluster'] = 0.0
-    #         elif isinstance(self.cat_feature, (unicode, str)):
-    #             # category is a feature
-    #             X['cluster'] = X[self.cat_feature]
-    #         elif isinstance(self.cat_feature, list):
-    #             cluster_map = dict()
-    #             for account in X['account_banner'].unique():
-    #                 if account in self.cat_feature:
-    #                     cluster_map[account] = account
-    #                 else:
-    #                     cluster_map[account] = 'general_cluster'
-    #             X['cluster'] = X['account_banner'].replace(cluster_map)
-    #     return X
 
     def transform(self, X):
         if 'cluster' not in X.columns:
