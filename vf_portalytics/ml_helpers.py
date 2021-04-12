@@ -50,8 +50,9 @@ def get_transformer(name):
 class CustomTransformer(BaseEstimator, TransformerMixin):
 
     """
+
     A custom transformer that supports multiple targets by using only the first target as input in the selected
-    transformer. 
+    transformer.
     """
 
     def __init__(self, transformer='TargetEncoder'):
@@ -72,7 +73,11 @@ class CustomTransformer(BaseEstimator, TransformerMixin):
 
 
 class AccountClusterTransformer(BaseEstimator, TransformerMixin):
-    """A custom transformer that could use a list of accounts to create clusters"""
+
+    """
+
+    A custom transformer that could use a list of accounts to create clusters
+    """
 
     def __init__(self, cat_feature_list=None):
         """
