@@ -71,24 +71,49 @@ class CustomTransformer(BaseEstimator, TransformerMixin):
 class AccountClusterTransformer(BaseEstimator, TransformerMixin):
     """A custom transformer that could use a list of accounts to create clusters"""
 
-    def __init__(self, cat_feature=None):
-        self.cat_feature = cat_feature
+    def __init__(self, cat_feature_list=None):
+        """
+        :param cat_feature_list: List of accounts in account_banner feature
+        """
+        self.cat_feature_list = cat_feature_list
 
     def fit(self, X, y=None):
         return self
 
+    # def transform(self, X):
+    #     if 'cluster' not in X.columns:
+    #         if self.cat_feature == 'vf_category' or self.cat_feature is None:
+    #             # vf_category means that no category defined
+    #             X['cluster'] = 0.0
+    #         elif isinstance(self.cat_feature, (unicode, str)):
+    #             # category is a feature
+    #             X['cluster'] = X[self.cat_feature]
+    #         elif isinstance(self.cat_feature, list):
+    #             cluster_map = dict()
+    #             for account in X['account_banner'].unique():
+    #                 if account in self.cat_feature:
+    #                     cluster_map[account] = account
+    #                 else:
+    #                     cluster_map[account] = 'general_cluster'
+    #             X['cluster'] = X['account_banner'].replace(cluster_map)
+    #     return X
+
     def transform(self, X):
         if 'cluster' not in X.columns:
-            if self.cat_feature == 'vf_category' or self.cat_feature is None:
+            if 'vf_category' in self.cat_feature_list or self.cat_feature_list is None:
                 # vf_category means that no category defined
                 X['cluster'] = 0.0
-            elif isinstance(self.cat_feature, (unicode, str)):
-                # category is a feature
-                X['cluster'] = X[self.cat_feature]
-            elif isinstance(self.cat_feature, list):
+            elif len(self.cat_feature_list) == 1:
+                # Single category
+                try:
+                    X['cluster'] = X[self.cat_feature_list[0]]
+                except KeyError:
+                    raise KeyError('Feature "{}" not in dataframe'.format(self.cat_feature_list[0]))
+            elif len(self.cat_feature_list) > 1:
+                # Multiple categories (accounts)
                 cluster_map = dict()
                 for account in X['account_banner'].unique():
-                    if account in self.cat_feature:
+                    if account in self.cat_feature_list:
                         cluster_map[account] = account
                     else:
                         cluster_map[account] = 'general_cluster'
