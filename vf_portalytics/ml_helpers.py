@@ -48,8 +48,12 @@ def get_transformer(name):
 
 
 class CustomTransformer(BaseEstimator, TransformerMixin):
-    """A custom transformer that supports multiple targets by using only the first target as input in the selected
-    transformer. """
+
+    """
+
+    A custom transformer that supports multiple targets by using only the first target as input in the selected
+    transformer.
+    """
 
     def __init__(self, transformer='TargetEncoder'):
         self.transformer = get_transformer(transformer)
@@ -66,3 +70,48 @@ class CustomTransformer(BaseEstimator, TransformerMixin):
             return self.transformer.transform(X, y)
         else:
             return self.transformer.transform(X, y.iloc[:, 0])
+
+
+class AccountClusterTransformer(BaseEstimator, TransformerMixin):
+
+    """
+
+    A custom transformer that can use a list of accounts to create clusters
+    """
+
+    def __init__(self, cat_feature_list=None):
+        """
+        :param cat_feature_list: List with single feature name or feature values of account_banner
+        """
+        self.cat_feature_list = cat_feature_list
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        """
+        Creates new cluster column for X by using cat_feature_list and mapping the rows for each category
+        :param X: DataFrame to transform
+        :returns: X: DataFrame input with the new 'cluster' column
+        """
+        if 'cluster' in X.columns:
+            return X
+        if 'vf_category' in self.cat_feature_list or self.cat_feature_list is None:
+            # vf_category means that no category defined
+            X['cluster'] = 0.0
+        elif len(self.cat_feature_list) == 1:
+            # Single category
+            try:
+                X['cluster'] = X[self.cat_feature_list[0]]
+            except KeyError:
+                raise KeyError('Feature "{}" not in dataframe'.format(self.cat_feature_list[0]))
+        else:
+            # Multiple categories (accounts)
+            cluster_map = dict()
+            for account in X['account_banner'].unique():
+                if account in self.cat_feature_list:
+                    cluster_map[account] = account
+                else:
+                    cluster_map[account] = 'general_cluster'
+            X['cluster'] = X['account_banner'].replace(cluster_map)
+        return X
