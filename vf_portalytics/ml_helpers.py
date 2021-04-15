@@ -115,3 +115,36 @@ class AccountClusterTransformer(BaseEstimator, TransformerMixin):
                     cluster_map[account] = 'general_cluster'
             X['cluster'] = X['account_banner'].replace(cluster_map)
         return X
+
+
+class CustomClusterTransformer(BaseEstimator, TransformerMixin):
+    """
+    A custom transformer creates 'cluster' column that can be used as cluster field.
+
+    """
+    def __init__(self, cat_feature=None):
+        """
+        :param cat_feature: None or existing field name in the dataset
+        """
+        self.cat_feature = cat_feature
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        """
+        Creates 'cluster' column for X.
+        :param X: DataFrame to transform.
+        :returns: X: DataFrame input with the new 'cluster' column.
+        """
+        if 'cluster' in X.columns:
+            return X
+        elif self.cat_feature == 'vf_category' or self.cat_feature is None:
+            # vf_category means that no category defined
+            X['cluster'] = 0.0
+        else:
+            try:
+                X['cluster'] = X[self.cat_feature]
+            except KeyError:
+                raise KeyError('Feature "{}" not in dataframe'.format(self.cat_feature))
+        return X
