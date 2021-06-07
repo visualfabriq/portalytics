@@ -1,2 +1,2 @@
 # portalytics
-Portable Jupyter Setup for Machine Learning
+Portable Jupyter Setup for Machine Learning.
