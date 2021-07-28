@@ -14,19 +14,26 @@ logger.setLevel(logging.INFO)
 
 class MultiModel(BaseEstimator, RegressorMixin):
 
-    def __init__(self, group_col=None, clusters=None, params=None,
-                 selected_features=None, nominals=None, ordinals=None):
+    def __init__(self, group_col, clusters, selected_features, nominals, ordinals, params):
         """
         Build a model for each subset of rows matching particular category of features group_col.
 
         Parameters:
             group_col: string
                 name of the column that the groups exist
-            clusters: array
+            clusters: list
                 the name of unique groups
+            selected_features: dictionary
+                keys the cluster name and values list of selected features
+                (gives the ability of using different features for different groups)
+            nominals: list
+                categorical features (from all clusters) that are nominal
+            ordinals: list
+                categorical features (from all clusters) that are ordinal
             params: dictionary of dictionaries
                 the group names with dicts that include the selected  model_name, its hyperparameters,
                 transformer names to be used.
+                (give the ability of using different models and categorical feature transformer for each group)
                 Example
                 -------
                 {'A': {
@@ -35,12 +42,6 @@ class MultiModel(BaseEstimator, RegressorMixin):
                         'transformer_ordinal': 'OrdinalEncoder'
                     }
                 }
-            selected_features: dictionary
-                keys the cluster name and values list of selected features
-            nominals: list
-                features (from all clusters) that are nominal
-            ordinals: list
-                features (from all clusters) that are ordinal
         """
         self.group_col = group_col
         self.clusters = clusters
@@ -138,13 +139,15 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
                 the name of unique groups
             selected_features: dictionary
                 keys the cluster name and values list of selected features
+                (gives the ability to use different features for different groups)
             nominals: list
-                features (from all clusters) that are nominal
+                categorical features (from all clusters) that are nominal
             ordinals: list
-                features (from all clusters) that are ordinal
+                categorical features (from all clusters) that are ordinal
             params: dictionary of dictionaries
                 the group names with dicts that include the selected  model_name, its hyperparameters,
-                transformer names to be used.
+                transformer names to be used. (give the ability of using different categorical feature
+                transformer for each group)
                 Example
                 -------
                 {'A': {
@@ -183,7 +186,7 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
             gp_transformer_nominals = self.transformers_nominals.get(gp_key)
             if gp_transformer_nominals:
                 gp_nominals = [feature for feature in self.categorical_features[gp_key] if feature in self.nominals]
-                gp_transformer_nominals.cols = gp_nominals
+                gp_transformer_nominals.transformer.cols = gp_nominals
                 # its transformed because if OneHotEncoder, next transformer needs equal feature size when transforming
                 x_group = gp_transformer_nominals.fit_transform(x_group, y_in)
 
@@ -191,7 +194,7 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
             gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
             if gp_transformer_ordinals:
                 gp_ordinals = [feature for feature in self.categorical_features[gp_key] if feature in self.ordinals]
-                gp_transformer_ordinals.cols = gp_ordinals
+                gp_transformer_ordinals.transformer.cols = gp_ordinals
                 gp_transformer_ordinals.fit(x_group, y_in)
 
             self.transformers_nominals[gp_key] = gp_transformer_nominals

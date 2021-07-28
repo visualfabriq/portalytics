@@ -234,6 +234,9 @@ def test_multi_model_with_double_target():
 def test_multi_transformer():
     total_x, total_y = make_dataset()
 
+    # make a copy of feature_0 to test if ordinals and nominals are being handled differently
+    total_x['feature_0_copy'] = total_x['feature_0']
+
     # Declare basic parameters
     target = 'target'
     cat_feature = 'category'
@@ -250,7 +253,7 @@ def test_multi_transformer():
     for gp_key in clusters:
         selected_features[gp_key] = feature_col_list
     nominal_features = ['feature_0']
-    ordinal_features = ['feature_1']
+    ordinal_features = ['feature_1', 'feature_0_copy']
 
     # imitate params given from hyper optimization tuning
     params = {
@@ -279,8 +282,12 @@ def test_multi_transformer():
 
     # check shapes
     assert test_x.shape[0] == transformed_test_x.shape[0]
-    assert transformed_test_x.shape[1] == 11
+    assert transformed_test_x.shape[1] == 9
 
     # check if OneHotEncoder did what expected
     transformed_test_x = transformed_test_x.reindex(test_x.index)
     assert (transformed_test_x['feature_0_1'].isna() == test_x[cat_feature].isin(['A', 'D'])).all()
+
+    # test if ordinals and nominals are being handled differently
+    assert transformed_test_x[test_x[cat_feature] == 'B']['feature_0'].isnull().values.all()  #  OneHotEncoder used
+    assert not transformed_test_x[test_x[cat_feature] == 'B']['feature_0_copy'].isnull().values.all()  #  TargetEncoder used
