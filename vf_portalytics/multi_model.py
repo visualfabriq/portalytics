@@ -220,7 +220,7 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
     def transform(self, X):
 
         groups = X.groupby(by=self.group_col)
-        transformed_x = pd.DataFrame()
+        transformed_x = []
 
         for gp_key, group in groups:
             x_group = group[self.selected_features.get(gp_key, group.columns)]
@@ -239,9 +239,9 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
             if gp_transformers_non_categorical and gp_transformers_non_categorical.transformer:
                 x_group = gp_transformers_non_categorical.transform(x_group)
 
-            transformed_x = transformed_x.append(x_group)
+            transformed_x.append(x_group)
 
-        return transformed_x
+        return pd.concat(transformed_x)
 
     def initiliaze_transformers(self):
         transformers_nominals = {}
