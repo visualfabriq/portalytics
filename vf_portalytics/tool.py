@@ -132,6 +132,15 @@ def get_categorical_features(data=None, potential_cat_feat=None):
     Given a DataFrame
     Return a list of features that are potentially categorical
     If potential_cat_feat is given returns it back
+
+    Parameters
+    ----------
+    data (dataframe): dataframe that is being cheched for potential categorical features
+    potential_cat_feat (list): in case of containing this as input this will also be the output
+
+    Returns
+    -------
+
     """
     if potential_cat_feat is None and isinstance(data, pd.DataFrame):
         potential_cat_feat = set(data.select_dtypes(include=['object']).columns)

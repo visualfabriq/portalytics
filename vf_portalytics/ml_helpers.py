@@ -4,6 +4,7 @@ import category_encoders as ce
 import pandas as pd
 from sklearn import ensemble
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -12,7 +13,9 @@ POTENTIAL_TRANSFORMER = {
     'OneHotEncoder': ce.OneHotEncoder,
     'OrdinalEncoder': ce.OrdinalEncoder,
     'TargetEncoder': ce.TargetEncoder,
-    'JamesSteinEncoder': ce.JamesSteinEncoder
+    'JamesSteinEncoder': ce.JamesSteinEncoder,
+    'MinMaxScaler': MinMaxScaler,
+    'StandardScaler': StandardScaler
 }
 
 POTENTIAL_MODELS = {
@@ -44,36 +47,67 @@ def get_transformer(name):
         return output()
     except KeyError:
         logger.exception("KeyError: The '%s' is not a potential transformer. TargetEncoder is being used" % str(name))
-        return ce.TargetEncoder()
+        return None
 
 
 class CustomTransformer(BaseEstimator, TransformerMixin):
 
-    """
+    def __init__(self, transformer='TargetEncoder', cols=None):
+        """
+        A custom transformer that supports multiple targets by using only the first target as input in the selected
+        transformer and subset of features
 
-    A custom transformer that supports multiple targets by using only the first target as input in the selected
-    transformer.
-    """
-
-    def __init__(self, transformer='TargetEncoder'):
+        Parameters
+        ----------
+        transformer (object): a transformer from POTENTIAL_TRANSFORMER
+        cols (list): a list of features that need to be transformed
+                     (subset of a features of X; input of fit() and transform)
+        """
         self.transformer = get_transformer(transformer)
+        self.cols = cols if cols else []
 
     def fit(self, X, y=None):
-        if y is None or isinstance(y, pd.Series):
-            self.transformer.fit(X, y)
-        else:
-            self.transformer.fit(X, y.iloc[:, 0])
+
+        if self.transformer is None:
+            logger.warning('transformer was not assigned in CustomTransformer, before fit')
+            return self
+
+        X = X[self.cols] if self.cols else X
+        # if target is multicolumn keep only the first one for fiting the transformer
+        y = y if y is None or isinstance(y, pd.Series) else y.iloc[:, 0]
+
+        self.transformer.fit(X, y)
         return self
 
-    def transform(self, X, y=None):
-        if y is None or isinstance(y, pd.Series):
-            return self.transformer.transform(X, y)
-        else:
-            return self.transformer.transform(X, y.iloc[:, 0])
+    def transform(self, X):
+
+        if self.transformer is None:
+            logger.warning('transformer was not assigned in CustomTransformer, before transform (output identical with input)')
+            return X
+
+        if self.cols:
+            return self._transform_col_subset(X)
+
+        transformed_x = self.transformer.transform(X)
+        transformed_x = self._post_process(transformed_x)
+        return transformed_x
+
+    def _transform_col_subset(self, X):
+        subset_x = X[self.cols]
+        subset_x = self.transformer.transform(subset_x)
+        subset_x = self._post_process(subset_x)
+
+        X.drop(self.cols, inplace=True, axis=1)
+        return pd.concat([X, subset_x], axis=1)
+
+    def _post_process(self, x):
+        """
+        sklearn scalers return numpy and category_encoders return dataframe
+        """
+        return x if isinstance(x, pd.DataFrame) else pd.DataFrame(x, columns=self.cols)
 
 
 class AccountClusterTransformer(BaseEstimator, TransformerMixin):
-
     """
 
     A custom transformer that can use a list of accounts to create clusters
@@ -122,6 +156,7 @@ class CustomClusterTransformer(BaseEstimator, TransformerMixin):
     A custom transformer creates 'cluster' column that can be used as cluster field.
 
     """
+
     def __init__(self, cat_feature=None):
         """
         :param cat_feature: None or existing field name in the dataset

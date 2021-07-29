@@ -12,6 +12,7 @@ from vf_portalytics.ml_helpers import get_model, CustomTransformer
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 class MultiModel(BaseEstimator, RegressorMixin):
 
     def __init__(self, group_col, clusters, selected_features, nominals, ordinals, params):
@@ -93,7 +94,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
                 raise AssertionError('The features that indicates categories in trainset do not exist in new data')
             X[self.group_col] = self.clusters[0]
 
-        transformed_x = self.multi_transformer.transform(X, y)
+        transformed_x = self.multi_transformer.transform(X)
         transformed_x[self.group_col] = X[self.group_col]
         transformed_x = transformed_x.reindex(X.index)
         del X
@@ -128,14 +129,14 @@ class MultiModel(BaseEstimator, RegressorMixin):
 
 class MultiTransformer(BaseEstimator, TransformerMixin):
 
-    def __init__(self, group_col,  clusters, selected_features, nominals, ordinals, params):
+    def __init__(self, group_col, clusters, selected_features, nominals, ordinals, params):
         """
         Build a transformer for each subset of rows matching particular category of features group_col.
 
         Parameters:
             group_col: string
                 name of the column that the groups exist
-            clusters: array:
+            clusters: list
                 the name of unique groups
             selected_features: dictionary
                 keys the cluster name and values list of selected features
@@ -145,14 +146,19 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
             ordinals: list
                 categorical features (from all clusters) that are ordinal
             params: dictionary of dictionaries
-                the group names with dicts that include the selected  model_name, its hyperparameters,
-                transformer names to be used. (give the ability of using different categorical feature
-                transformer for each group)
+                the group names with dicts that includes optionally
+                    * transformer_nominal transformer to be used for nominals
+                    * transformer_ordinal transformer to be used for ordinals
+                    * transformer_non_categorical: transformer to be used for non categorical features
+                    * potential_cat_feat: indicates to the transformer which are the categorical features instead of
+                                          letting it decide by it self
                 Example
                 -------
                 {'A': {
                         'transformer_nominal': 'TargetEncoder',
                         'transformer_ordinal': 'OrdinalEncoder'
+                        'transformer_non_categorical': 'MinMaxScaler',
+                        'potential_cat_feat': ['feat1', 'feat2']
                     }
                 }
         """
@@ -166,7 +172,8 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
         self.categorical_features = dict()
         self.transformers_nominals = None
         self.transformers_ordinals = None
-        self.transformers_nominals, self.transformers_ordinals = self.initiliaze_transformers()
+        self.transformers_non_categorical = None
+        self.transformers_nominals, self.transformers_ordinals, self.transformers_non_categorical = self.initiliaze_transformers()
 
     def fit(self, X, y=None):
         """
@@ -177,33 +184,40 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
         groups = X.groupby(by=self.group_col)
         for gp_key, group in groups:
             x_group = group[self.selected_features[gp_key]]
-            y_in = y.loc[x_group.index]
+            y_in = y.loc[x_group.index] if y is not None else None
             # preprocessing
             self.categorical_features[gp_key] = get_categorical_features(data=x_group,
                                                                          potential_cat_feat=self.params[gp_key].get(
                                                                              'potential_cat_feat', None))
             # preprocess nominals
             gp_transformer_nominals = self.transformers_nominals.get(gp_key)
-            if gp_transformer_nominals:
+            if gp_transformer_nominals.transformer:
                 gp_nominals = [feature for feature in self.categorical_features[gp_key] if feature in self.nominals]
-                gp_transformer_nominals.transformer.cols = gp_nominals
-                # its transformed because if OneHotEncoder, next transformer needs equal feature size when transforming
+                gp_transformer_nominals.cols = gp_nominals
+                # its also transformed because if OneHotEncoder next transformer needs equal feature size in transform()
                 x_group = gp_transformer_nominals.fit_transform(x_group, y_in)
 
             # preprocess ordinals
             gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
-            if gp_transformer_ordinals:
+            if gp_transformer_ordinals.transformer:
                 gp_ordinals = [feature for feature in self.categorical_features[gp_key] if feature in self.ordinals]
-                gp_transformer_ordinals.transformer.cols = gp_ordinals
+                gp_transformer_ordinals.cols = gp_ordinals
                 gp_transformer_ordinals.fit(x_group, y_in)
+
+            # preprocess non categoricals
+            gp_transformers_non_categorical = self.transformers_non_categorical.get(gp_key)
+            if gp_transformers_non_categorical.transformer:
+                gp_non_categoricals = [feature for feature in x_group.columns
+                                       if feature not in self.categorical_features[gp_key]]
+                gp_transformers_non_categorical.cols = gp_non_categoricals
+                gp_transformers_non_categorical.fit(x_group, y_in)
 
             self.transformers_nominals[gp_key] = gp_transformer_nominals
             self.transformers_ordinals[gp_key] = gp_transformer_ordinals
             print('Transformer for %s fitted' % str(gp_key))
         return self
 
-
-    def transform(self, X, y=None):
+    def transform(self, X):
 
         groups = X.groupby(by=self.group_col)
         transformed_x = pd.DataFrame()
@@ -213,12 +227,17 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
             # preprocessing
             # nominals
             gp_transformer_nominals = self.transformers_nominals.get(gp_key)
-            if gp_transformer_nominals:
+            if gp_transformer_nominals and gp_transformer_nominals.transformer:
                 x_group = gp_transformer_nominals.transform(x_group)
             # ordinals
             gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
-            if gp_transformer_ordinals:
+            if gp_transformer_ordinals and gp_transformer_ordinals.transformer:
                 x_group = gp_transformer_ordinals.transform(x_group)
+
+            # ordinals
+            gp_transformers_non_categorical = self.transformers_non_categorical.get(gp_key)
+            if gp_transformers_non_categorical and gp_transformers_non_categorical.transformer:
+                x_group = gp_transformers_non_categorical.transform(x_group)
 
             transformed_x = transformed_x.append(x_group)
 
@@ -227,13 +246,16 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
     def initiliaze_transformers(self):
         transformers_nominals = {}
         transformers_ordinals = {}
+        transformers_non_categorical = {}
         for gp_key in self.clusters:
-
             # nominals
             transformer_name = self.params[gp_key].get('transformer_nominal')
             transformers_nominals.update({gp_key: CustomTransformer(transformer_name)})
             # ordinals
             transformer_name = self.params[gp_key].get('transformer_ordinal')
             transformers_ordinals.update({gp_key: CustomTransformer(transformer_name)})
+            # non categoricals
+            transformer_name = self.params[gp_key].get('transformer_non_categorical')
+            transformers_non_categorical.update({gp_key: CustomTransformer(transformer_name)})
 
-        return transformers_nominals, transformers_ordinals
+        return transformers_nominals, transformers_ordinals, transformers_non_categorical

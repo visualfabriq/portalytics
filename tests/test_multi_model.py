@@ -231,7 +231,7 @@ def test_multi_model_with_double_target():
     assert model.sub_models['D'].n_estimators == 200
 
 
-def test_multi_transformer():
+def test_multi_transformer_categorical_features():
     total_x, total_y = make_dataset()
 
     # make a copy of feature_0 to test if ordinals and nominals are being handled differently
@@ -291,3 +291,26 @@ def test_multi_transformer():
     # test if ordinals and nominals are being handled differently
     assert transformed_test_x[test_x[cat_feature] == 'B']['feature_0'].isnull().values.all()  #  OneHotEncoder used
     assert not transformed_test_x[test_x[cat_feature] == 'B']['feature_0_copy'].isnull().values.all()  #  TargetEncoder used
+
+def test_multi_transformer_non_categorical_features():
+    cat_feature = 'cat'
+    clusters = ['A']
+    selected_features = {'A': ['col_1', 'col_2']}
+    total_x = pd.DataFrame({'col_1': [50, 100, 200], 'col_2': [1., 2., 3.], 'cat_feature': clusters*3})
+
+    params = {
+        'A': {
+            'transformer_non_categorical': 'MinMaxScaler',
+            'potential_cat_feat': []
+        }
+    }
+
+    # Since MultiTransformer is built for having a transformer for each group of the input, these groups need to exist
+    total_x[cat_feature] = clusters[0]
+    # Initiliaze transformer
+    transformer = MultiTransformer(cat_feature, clusters, selected_features, nominals=[], ordinals=[], params=params)
+    transformer.fit(total_x)
+    transformed_x = transformer.transform(total_x)
+
+    expected = pd.DataFrame({'col_1': [0., 0.333333, 1.], 'col_2': [0.0, 0.5, 1]})
+    pd.testing.assert_frame_equal(transformed_x, expected)
