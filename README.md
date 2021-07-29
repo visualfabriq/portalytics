@@ -11,7 +11,7 @@ It is valuable in cases that our dataset vary a lot, but we still need to manage
       
 * `selected_features` give the ability of using different features for each group.
 
-* `params` give the ability of using different model and categorical-feature transformer for each group.
+* `params` give the ability of using different model and feature transformer for each group.
     
 The Jupyter notebook [multimodel_example.ipynb](example_notebooks/multimodel_example.ipynb) contains an 
 end-to-end example of how MultiModel can be trained and saved using vf_portalytics Model wrapper.
@@ -19,7 +19,7 @@ end-to-end example of how MultiModel can be trained and saved using vf_portalyti
 MultiModel can support every sklearn based model, the only thing that is need to be done is to extend 
 [`POTENTIAL_MODELS`](./vf_portalytics/ml_helpers.py) dictionary. Feel free to raise a PR. 
 
-MultiTransformer is the transformer that is being used inside MultiModel to transform categorical features into numbers.
+MultiTransformer is the transformer that is being used inside MultiModel to transform features into numbers.
 It is a custom sklearn transformer that contains one transformer for each group of training data.
 
 * Can be used also separately, in the same way as MultiModel. Check [example](./tests/test_multi_model.py)
