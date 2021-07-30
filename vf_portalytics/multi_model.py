@@ -195,7 +195,8 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
                 gp_nominals = [feature for feature in self.categorical_features[gp_key] if feature in self.nominals]
                 gp_transformer_nominals.cols = gp_nominals
                 # its also transformed because if OneHotEncoder next transformer needs equal feature size in transform()
-                x_group = gp_transformer_nominals.fit_transform(x_group, y_in)
+                gp_transformer_nominals.fit(x_group, y_in)
+                x_group = gp_transformer_nominals.transform(x_group)
 
             # preprocess ordinals
             gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
@@ -203,13 +204,12 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
                 gp_ordinals = [feature for feature in self.categorical_features[gp_key] if feature in self.ordinals]
                 gp_transformer_ordinals.cols = gp_ordinals
                 gp_transformer_ordinals.fit(x_group, y_in)
+                x_group = gp_transformer_ordinals.transform(x_group)
 
             # preprocess non categoricals
             gp_transformers_non_categorical = self.transformers_non_categorical.get(gp_key)
             if gp_transformers_non_categorical.transformer:
-                gp_non_categoricals = [feature for feature in x_group.columns
-                                       if feature not in self.categorical_features[gp_key]]
-                gp_transformers_non_categorical.cols = gp_non_categoricals
+                gp_transformers_non_categorical.cols = self.selected_features[gp_key]
                 gp_transformers_non_categorical.fit(x_group, y_in)
 
             self.transformers_nominals[gp_key] = gp_transformer_nominals
@@ -229,12 +229,13 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
             gp_transformer_nominals = self.transformers_nominals.get(gp_key)
             if gp_transformer_nominals and gp_transformer_nominals.transformer:
                 x_group = gp_transformer_nominals.transform(x_group)
+
             # ordinals
             gp_transformer_ordinals = self.transformers_ordinals.get(gp_key)
             if gp_transformer_ordinals and gp_transformer_ordinals.transformer:
                 x_group = gp_transformer_ordinals.transform(x_group)
 
-            # ordinals
+            # non categoricals
             gp_transformers_non_categorical = self.transformers_non_categorical.get(gp_key)
             if gp_transformers_non_categorical and gp_transformers_non_categorical.transformer:
                 x_group = gp_transformers_non_categorical.transform(x_group)

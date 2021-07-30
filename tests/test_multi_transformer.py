@@ -51,7 +51,14 @@ def test_multi_transformer_categorical_features():
     }
 
     # Initiliaze transformer
-    transformer = MultiTransformer(cat_feature, clusters, selected_features, nominal_features, ordinal_features, params)
+    transformer = MultiTransformer(
+        cat_feature,
+        clusters,
+        selected_features,
+        nominal_features,
+        ordinal_features,
+        params
+    )
     transformer.fit(train_x, train_y)
     transformed_test_x = transformer.transform(test_x)
 
@@ -86,7 +93,14 @@ def test_multi_transformer_non_categorical_features():
     # Since MultiTransformer is built for having a transformer for each group of the input, these groups need to exist
     total_x[cat_feature] = clusters[0]
     # Initiliaze transformer
-    transformer = MultiTransformer(cat_feature, clusters, selected_features, nominals=[], ordinals=[], params=params)
+    transformer = MultiTransformer(
+        cat_feature,
+        clusters,
+        selected_features,
+        nominals=[],
+        ordinals=[],
+        params=params
+    )
     transformer.fit(total_x)
     transformed_x = transformer.transform(total_x)
 

@@ -89,22 +89,22 @@ class CustomTransformer(BaseEstimator, TransformerMixin):
             return self._transform_col_subset(X)
 
         transformed_x = self.transformer.transform(X)
-        transformed_x = self._post_process(transformed_x)
+        transformed_x = self._post_process(transformed_x, X.index)
         return transformed_x
 
     def _transform_col_subset(self, X):
         subset_x = X[self.cols]
         subset_x = self.transformer.transform(subset_x)
-        subset_x = self._post_process(subset_x)
+        subset_x = self._post_process(subset_x, X.index)
 
         X.drop(self.cols, inplace=True, axis=1)
         return pd.concat([X, subset_x], axis=1)
 
-    def _post_process(self, x):
+    def _post_process(self, x, index):
         """
         sklearn scalers return numpy and category_encoders return dataframe
         """
-        return x if isinstance(x, pd.DataFrame) else pd.DataFrame(x, columns=self.cols)
+        return x if isinstance(x, pd.DataFrame) else pd.DataFrame(x, columns=self.cols, index=index)
 
 
 class AccountClusterTransformer(BaseEstimator, TransformerMixin):
