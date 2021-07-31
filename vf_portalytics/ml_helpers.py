@@ -4,6 +4,7 @@ import category_encoders as ce
 import pandas as pd
 from sklearn import ensemble
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.multioutput import RegressorChain
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 logger = logging.getLogger(__name__)
@@ -20,8 +21,15 @@ POTENTIAL_TRANSFORMER = {
 
 POTENTIAL_MODELS = {
     'XGBRegressor': xgboost.XGBRegressor,
+    'XGBRegressorChain': RegressorChain(xgboost.XGBRegressor),
     'ExtraTreesRegressor': ensemble.ExtraTreesRegressor,
 }
+
+
+def _initialize_model(fc_model, params):
+    initialized_params = {key: value for key, value in params.items() if key in fc_model._get_param_names()}
+    model = fc_model(**initialized_params)
+    return model
 
 
 def get_model(params):
@@ -29,10 +37,13 @@ def get_model(params):
     try:
         model_name = params.get('model_name')
         fc_model = POTENTIAL_MODELS[model_name]
-        initialized_params = {key: value for key, value in params.items()
-                              if key in fc_model._get_param_names()}
-        model = fc_model(**initialized_params)
-        return model
+        if model_name == 'XGBRegressorChain':
+            # handle differently a nested model
+            fc_model.base_estimator = _initialize_model(fc_model.base_estimator, params)
+            fc_model.order = params.get('order')
+        else:
+            fc_model = _initialize_model(fc_model, params)
+        return fc_model
     except KeyError:
         logger.exception("KeyError: The '%s ' is not a currently supported model. "
                          "XGBRegressor is being used" % str(model_name))
@@ -82,7 +93,8 @@ class CustomTransformer(BaseEstimator, TransformerMixin):
     def transform(self, X):
 
         if self.transformer is None:
-            logger.warning('transformer was not assigned in CustomTransformer, before transform (output identical with input)')
+            logger.warning(
+                'transformer was not assigned in CustomTransformer, before transform (output identical with input)')
             return X
 
         if self.cols:
