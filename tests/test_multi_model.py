@@ -2,7 +2,7 @@ import pandas as pd
 
 from sklearn.model_selection import train_test_split
 
-from tests.test_tool import make_dataset, make_regression_dataset
+from tests.helpers import make_dataset, make_regression_dataset
 from vf_portalytics.multi_model import MultiModel
 
 
