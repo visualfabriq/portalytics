@@ -1,8 +1,8 @@
 import logging
-import xgboost
+from xgboost import XGBRegressor
 import category_encoders as ce
 import pandas as pd
-from sklearn import ensemble
+from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.multioutput import RegressorChain
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
@@ -20,9 +20,9 @@ POTENTIAL_TRANSFORMER = {
 }
 
 POTENTIAL_MODELS = {
-    'XGBRegressor': xgboost.XGBRegressor,
-    'XGBRegressorChain': RegressorChain(xgboost.XGBRegressor),
-    'ExtraTreesRegressor': ensemble.ExtraTreesRegressor,
+    'XGBRegressor': XGBRegressor,
+    'XGBRegressorChain': RegressorChain(XGBRegressor),
+    'ExtraTreesRegressor': ExtraTreesRegressor,
 }
 
 
