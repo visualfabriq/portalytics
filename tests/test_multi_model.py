@@ -167,7 +167,7 @@ def test_multi_model_with_double_target():
             'transformer_ordinal': 'OrdinalEncoder'
         },
         'D': {
-            'model_name': 'ExtraTreesRegressor',
+            'model_name': 'XGBRegressorChain',
             'max_depth': 2,
             'min_samples_leaf': 400,
             'min_samples_split': 400,
