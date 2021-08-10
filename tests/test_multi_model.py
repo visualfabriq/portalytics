@@ -167,7 +167,8 @@ def test_multi_model_with_double_target():
             'transformer_ordinal': 'OrdinalEncoder'
         },
         'D': {
-            'model_name': 'ExtraTreesRegressor',
+            'model_name': 'XGBRegressorChain',
+            'order': [0, 1],
             'max_depth': 2,
             'min_samples_leaf': 400,
             'min_samples_split': 400,
@@ -185,4 +186,4 @@ def test_multi_model_with_double_target():
 
     assert pred_test_y.shape[1] == 2
     assert model.sub_models['C'].n_estimators == 100
-    assert model.sub_models['D'].n_estimators == 200
+    assert model.sub_models['D'].base_estimator.n_estimators == 200

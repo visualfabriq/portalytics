@@ -1,8 +1,8 @@
 import logging
-import xgboost
+from xgboost import XGBRegressor
 import category_encoders as ce
 import pandas as pd
-from sklearn import ensemble
+from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.multioutput import RegressorChain
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
@@ -20,14 +20,14 @@ POTENTIAL_TRANSFORMER = {
 }
 
 POTENTIAL_MODELS = {
-    'XGBRegressor': xgboost.XGBRegressor,
-    'XGBRegressorChain': RegressorChain(xgboost.XGBRegressor),
-    'ExtraTreesRegressor': ensemble.ExtraTreesRegressor,
+    'XGBRegressor': XGBRegressor,
+    'XGBRegressorChain': RegressorChain(XGBRegressor),
+    'ExtraTreesRegressor': ExtraTreesRegressor,
 }
 
 
 def _initialize_model(fc_model, params):
-    initialized_params = {key: value for key, value in params.items() if key in fc_model._get_param_names()}
+    initialized_params = {key: value for key, value in params.items() if key in fc_model().get_params()}
     model = fc_model(**initialized_params)
     return model
 
@@ -39,7 +39,15 @@ def get_model(params):
         fc_model = POTENTIAL_MODELS[model_name]
         if model_name == 'XGBRegressorChain':
             # handle differently a nested model
-            fc_model.base_estimator = _initialize_model(fc_model.base_estimator, params)
+            # no time to find the issue but when get_model is called inside MultiModel XGBRegressorChain comes
+            # with initialized ExtraTreesRegressor but when get_model is called independently
+            # ExtraTreesRegressor is just a module
+            if callable(fc_model.base_estimator):
+                fc_model.base_estimator = _initialize_model(fc_model.base_estimator, params)
+            else:
+                initialized_params = {'base_estimator__' + key: value for key, value in params.items()
+                                      if 'base_estimator__' + key in fc_model.get_params()}
+                fc_model.set_params(**initialized_params)
             fc_model.order = params.get('order')
         else:
             fc_model = _initialize_model(fc_model, params)

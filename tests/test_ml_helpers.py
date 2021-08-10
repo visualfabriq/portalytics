@@ -6,7 +6,6 @@ from xgboost import XGBRegressor
 from vf_portalytics.ml_helpers import get_model
 
 
-@pytest.mark.skip("Fails in Circle-Ci for python")
 def test_get_model():
     # test xgboost
     params = {

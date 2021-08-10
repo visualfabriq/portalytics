@@ -80,7 +80,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
                 logger.exception('A Dummy Classifier was chosen')
                 gp_model = DummyClassifier(constant=0)
             # fit
-            gp_model = gp_model.fit(X=x_group, y=y_in.values)
+            gp_model = gp_model.fit(x_group, y_in.values)
 
             self.sub_models[gp_key] = gp_model
             print('Model for %s trained' % str(gp_key))
