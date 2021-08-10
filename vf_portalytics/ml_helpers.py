@@ -27,7 +27,7 @@ POTENTIAL_MODELS = {
 
 
 def _initialize_model(fc_model, params):
-    initialized_params = {key: value for key, value in params.items() if key in fc_model._get_param_names()}
+    initialized_params = {key: value for key, value in params.items() if key in fc_model().get_params()}
     model = fc_model(**initialized_params)
     return model
 
