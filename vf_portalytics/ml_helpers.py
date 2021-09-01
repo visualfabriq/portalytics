@@ -6,6 +6,9 @@ from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.multioutput import RegressorChain
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from tensorflow.python.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -23,8 +26,43 @@ POTENTIAL_MODELS = {
     'XGBRegressor': XGBRegressor,
     'XGBRegressorChain': RegressorChain(XGBRegressor),
     'ExtraTreesRegressor': ExtraTreesRegressor,
+    'KerasRegressor': KerasRegressor  # its an sklearn wrapper for keras models
 }
 
+
+def one_layer_nn(params):
+    """
+
+    Parameters
+    ----------
+    params (dict): dictionary with parameters to initialize the NN
+                eg:{
+                'input_nodes': 20,
+                'nr_nodes_0': 30,
+                'activation_0': 'sigmoid',
+                'loss': 'mean_squared_error',
+                'kernel_initializer_0': 'he_normal',
+                 'kernel_initializer_1': 'normal',
+                 'dropout': 0.20,
+                 'output_nodes':  3,
+                 'optimizer': 'adam',
+                 'model_name': 'KerasRegressor'
+                 }
+
+    Returns
+    -------
+    model (keras.Sequential): initialized one layer neural network
+
+    """
+    model = Sequential()
+    model.add(Dense(params.get('nr_nodes_0', 20),
+            input_dim=params.get('input_nodes', 20),
+            kernel_initializer=params.get('kernel_initializer_0'),
+            activation=params.get('activation_0')))
+    model.add(Dropout(params.get('dropout', 0.2)))
+    model.add(Dense(params.get('output_nodes', 3), kernel_initializer=params.get('kernel_initializer_1')))
+    model.compile(loss=params.get('loss', 'mean_squared_error'), optimizer=params.get('optimizer', 'adam'))
+    return model
 
 def _initialize_model(fc_model, params):
     initialized_params = {key: value for key, value in params.items() if key in fc_model().get_params()}
@@ -47,17 +85,21 @@ def get_model(params):
             else:
                 initialized_params = {'base_estimator__' + key: value for key, value in params.items()
                                       if 'base_estimator__' + key in fc_model.get_params()}
-                fc_model.set_params(**initialized_params)
+                fc_model = fc_model.set_params(**initialized_params)
             fc_model.order = params.get('order')
+            model = fc_model
+        elif model_name == 'KerasRegressor':
+            model = fc_model(build_fn=one_layer_nn(params))
         else:
-            fc_model = _initialize_model(fc_model, params)
-        return fc_model
+            model = _initialize_model(fc_model, params)
+
     except KeyError:
         logger.exception("KeyError: The '%s ' is not a currently supported model. "
                          "XGBRegressor is being used" % str(model_name))
         fc_model = POTENTIAL_MODELS['XGBRegressor']
         model = fc_model()
-        return model
+
+    return model
 
 
 def get_transformer(name):
