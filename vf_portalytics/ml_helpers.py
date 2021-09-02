@@ -36,7 +36,8 @@ def one_layer_nn(params):
     Parameters
     ----------
     params (dict): dictionary with parameters to initialize the NN
-                eg:{
+                eg. :
+                {
                 'input_nodes': 20,
                 'nr_nodes_0': 30,
                 'activation_0': 'sigmoid',
@@ -89,7 +90,12 @@ def get_model(params):
             fc_model.order = params.get('order')
             model = fc_model
         elif model_name == 'KerasRegressor':
-            model = fc_model(build_fn=one_layer_nn(params))
+            model = fc_model(
+                build_fn=lambda: one_layer_nn(params),
+                batch_size=params.get('batch_size'),
+                epochs=params.get('epochs'),
+                verbose=0
+            )
         else:
             model = _initialize_model(fc_model, params)
 
