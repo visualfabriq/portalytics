@@ -93,7 +93,7 @@ def get_model(params):
             model = fc_model(
                 build_fn=lambda: one_layer_nn(params),
                 batch_size=params.get('batch_size'),
-                epochs=params.get('epochs'),
+                epochs=params.get('epochs', 100),
                 verbose=0
             )
         else:
