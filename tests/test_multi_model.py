@@ -125,7 +125,7 @@ def test_multi_model_with_double_target():
 
     # make the target double
     train_y = pd.DataFrame({'target_1': train_y, 'target_2': 2 * train_y})
-    # test_y = pd.DataFrame({'target_1': test_y, 'target_2': 2 * test_y})
+    test_y = pd.DataFrame({'target_1': test_y, 'target_2': 2 * test_y})
 
     # keep all the features
     selected_features = {}
@@ -155,8 +155,8 @@ def test_multi_model_with_double_target():
             'transformer_ordinal': 'OrdinalEncoder'
         },
         'C': {
-            'input_nodes': 4,
-            'nr_nodes_0': 5,
+            'input_nodes': 5,
+            'nr_nodes_0': 3,
             'activation_0': 'sigmoid',
             'loss': 'mean_squared_error',
             'transformer_nominal': 'TargetEncoder',
@@ -188,3 +188,4 @@ def test_multi_model_with_double_target():
     assert model.sub_models['B'].n_estimators == 100
     assert isinstance(model.sub_models['C'], KerasRegressor)
     assert model.sub_models['D'].base_estimator.n_estimators == 200
+    assert not pred_test_y.isna().all().all()
