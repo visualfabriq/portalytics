@@ -164,6 +164,7 @@ def test_multi_model_with_double_target():
             'dropout': 0.20,
             'output_nodes': 2,
             'optimizer': 'adam',
+            'epochs': 2,
             'model_name': 'KerasRegressor'
         },
         'D': {
