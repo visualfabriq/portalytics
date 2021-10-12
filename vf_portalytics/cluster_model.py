@@ -17,7 +17,8 @@ class ClusterModel(BaseEstimator, RegressorMixin):
                  multiplication_columns=None,
                  division_columns=None,
                  sub_models=None,
-                 min_observations_per_cluster=5):
+                 min_observations_per_cluster=5,
+                 baseline_column=None):
         """
         Build regression model for subsets of feature rows matching particular combination of feature columns.
 
@@ -46,6 +47,8 @@ class ClusterModel(BaseEstimator, RegressorMixin):
         min_observations_per_cluster : int | 5
             The minimum number of observations before a cluster is created. Otherwise the observations are passed on to
             the next clustering key level.
+        baseline_column : str | None
+            The name of the column that contains the value that no prediction should be below during predict().
         """
         self.seasonality_dict = seasonality_dict
         self.seasonality_key_columns = seasonality_key_columns
@@ -55,6 +58,7 @@ class ClusterModel(BaseEstimator, RegressorMixin):
         self.division_columns = division_columns
         self.sub_models = sub_models
         self.min_observations_per_cluster = min_observations_per_cluster
+        self.baseline_column = baseline_column
         self.nr_target_variables = 1
 
         if seasonality_dict is not None and (seasonality_key_columns is None or len(seasonality_key_columns) == 0):
@@ -204,10 +208,13 @@ class ClusterModel(BaseEstimator, RegressorMixin):
         # Predict -1 for the rest
         indices_to_score = X[~X.index.isin(scored_record_indices)].index
         results.append(pd.DataFrame(-np.ones(self.nr_target_variables * len(indices_to_score))
-                                       .reshape(len(indices_to_score), self.nr_target_variables),
+                                    .reshape(len(indices_to_score), self.nr_target_variables),
                                     index=indices_to_score))
 
-        return pd.concat(results, axis=0).loc[X.index]
+        results = pd.concat(results, axis=0).loc[X.index]
+        if self.baseline_column is not None:
+            results = pd.concat([results, X[self.baseline_column]], axis=1).max(axis=1)
+        return results
 
 
 class ClusterSubModel(BaseEstimator, RegressorMixin):
