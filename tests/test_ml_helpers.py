@@ -1,6 +1,8 @@
 import pytest
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.multioutput import RegressorChain
+from tensorflow.python.keras import Sequential
+from tensorflow.python.keras.wrappers.scikit_learn import KerasRegressor
 from xgboost import XGBRegressor
 
 from vf_portalytics.ml_helpers import get_model
@@ -48,5 +50,14 @@ def test_get_model():
     assert model.base_estimator.max_depth == params['max_depth']
     assert model.base_estimator.n_estimators == params['n_estimators']
     assert model.order == params['order']
+
+    # test KerasRegressor
+    params = {
+        'model_name': 'KerasRegressor'
+    }
+    model = get_model(params)
+
+    assert isinstance(model, KerasRegressor)
+    assert model.get_params()['epochs'] == 100
 
 

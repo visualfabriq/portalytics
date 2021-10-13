@@ -1,4 +1,5 @@
 import pandas as pd
+from tensorflow.python.keras.wrappers.scikit_learn import KerasRegressor
 
 from sklearn.model_selection import train_test_split
 
@@ -81,7 +82,6 @@ def test_multi_model_to_single_model():
     clusters = train_x[cat_feature].unique()
     feature_col_list = train_x.columns.drop(cat_feature)
 
-
     print('Clusters: {}'.format(clusters))
 
     # keep all the features
@@ -99,7 +99,6 @@ def test_multi_model_to_single_model():
             'transformer_ordinal': 'OrdinalEncoder'},
     }
 
-
     # Initiliaze model
     model = MultiModel(group_col=cat_feature, clusters=clusters, params=params,
                        selected_features=selected_features, nominals=nominal_features, ordinals=ordinal_features)
@@ -110,7 +109,6 @@ def test_multi_model_to_single_model():
 
 
 def test_multi_model_with_double_target():
-
     n_features = 5
     total_x, total_y = make_dataset()
 
@@ -120,15 +118,14 @@ def test_multi_model_with_double_target():
     feature_col_list = total_x.columns.drop(cat_feature)
     clusters = total_x[cat_feature].unique()
 
-
     # Split into train and test
     train_index, test_index = train_test_split(total_x.index, test_size=0.33, random_state=5)
     train_x, train_y = total_x.loc[train_index, :], total_y.loc[train_index]
     test_x, test_y = total_x.loc[test_index, :], total_y.loc[test_index]
 
     # make the target double
-    train_y = pd.DataFrame({'target_1': train_y, 'target_2': 2*train_y})
-    test_y = pd.DataFrame({'target_1': test_y, 'target_2': 2*test_y})
+    train_y = pd.DataFrame({'target_1': train_y, 'target_2': 2 * train_y})
+    test_y = pd.DataFrame({'target_1': test_y, 'target_2': 2 * test_y})
 
     # keep all the features
     selected_features = {}
@@ -158,13 +155,17 @@ def test_multi_model_with_double_target():
             'transformer_ordinal': 'OrdinalEncoder'
         },
         'C': {
-            'model_name': 'ExtraTreesRegressor',
-            'max_depth': 2,
-            'min_samples_leaf': 400,
-            'min_samples_split': 400,
-            'n_estimators': 100,
+            'input_nodes': 5,
+            'nr_nodes_0': 3,
+            'activation_0': 'sigmoid',
+            'loss': 'mean_squared_error',
             'transformer_nominal': 'TargetEncoder',
-            'transformer_ordinal': 'OrdinalEncoder'
+            'transformer_ordinal': 'OrdinalEncoder',
+            'dropout': 0.20,
+            'output_nodes': 2,
+            'optimizer': 'adam',
+            'epochs': 2,
+            'model_name': 'KerasRegressor'
         },
         'D': {
             'model_name': 'XGBRegressorChain',
@@ -185,5 +186,7 @@ def test_multi_model_with_double_target():
     pred_test_y = model.predict(test_x)
 
     assert pred_test_y.shape[1] == 2
-    assert model.sub_models['C'].n_estimators == 100
+    assert model.sub_models['B'].n_estimators == 100
+    assert isinstance(model.sub_models['C'], KerasRegressor)
     assert model.sub_models['D'].base_estimator.n_estimators == 200
+    assert not pred_test_y.isna().all().all()
