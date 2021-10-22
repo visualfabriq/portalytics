@@ -144,7 +144,7 @@ def test_multi_model_with_double_target():
             'max_depth': 2,
             'min_samples_leaf': 400,
             'min_samples_split': 400,
-            'n_estimators': 100,
+            'n_estimators': 10,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         },
@@ -153,7 +153,7 @@ def test_multi_model_with_double_target():
             'max_depth': 2,
             'min_samples_leaf': 400,
             'min_samples_split': 400,
-            'n_estimators': 100,
+            'n_estimators': 10,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         },
@@ -162,7 +162,7 @@ def test_multi_model_with_double_target():
             'max_depth': 2,
             'min_samples_leaf': 400,
             'min_samples_split': 400,
-            'n_estimators': 100,
+            'n_estimators': 10,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         },
@@ -172,7 +172,7 @@ def test_multi_model_with_double_target():
             'max_depth': 2,
             'min_samples_leaf': 400,
             'min_samples_split': 400,
-            'n_estimators': 200,
+            'n_estimators': 11,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         },
@@ -185,5 +185,5 @@ def test_multi_model_with_double_target():
     pred_test_y = model.predict(test_x)
 
     assert pred_test_y.shape[1] == 2
-    assert model.sub_models['C'].n_estimators == 100
-    assert model.sub_models['D'].base_estimator.n_estimators == 200
+    assert model.sub_models['C'].n_estimators == 10
+    assert model.sub_models['D'].base_estimator.n_estimators == 11
