@@ -5,6 +5,7 @@ import numpy as np
 
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.dummy import DummyClassifier
+from xgboost import XGBRegressor
 
 from vf_portalytics.tool import get_categorical_features
 from vf_portalytics.ml_helpers import get_model, CustomTransformer
@@ -107,6 +108,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
             # Find the sub-model for this group key and fit
             try:
                 gp_model = self.sub_models[gp_key]
+                if isinstance(gp_model, XGBRegressor):
+                    x_group = x_group[gp_model.get_booster().feature_names]
             except KeyError:
                 logger.exception('There was no model initialized for category %s' % str(gp_key))
                 logger.exception('A Dummy Classifier was chosen')
