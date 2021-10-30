@@ -1,6 +1,19 @@
 # portalytics
 Portable Jupyter Setup for Machine Learning.
 
+A consistent interface for creating Machine Learning Models compatible with VisualFabriq environment.
+
+Build models using our portalytics module.
+The module is available as [pip package](https://pypi.org/project/vf-portalytics/), install simply by:
+```
+pip install vf-portalytics
+```
+Pay attention to the requirements because it is important for the model to be built with the ones that we support. 
+
+There are [examples](https://github.com/visualfabriq/portalytics/blob/master/example_notebooks/feature_subset_example.ipynb) of how you can use portalytics. Examples for a simple model or more complex models like MultiModel.
+
+Make sure that after saving the model using portalyctis, its possible that the model can be loaded and still contains all the important information (eg. the loaded model is able to perform a prediction?)
+
 
 ## [MultiModel and MultiTransformer](./vf_portalytics/multi_model.py) 
 MultiModel is a custom sklearn model that contains one model for each group of training data. 
