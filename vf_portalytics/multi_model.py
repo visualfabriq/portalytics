@@ -77,8 +77,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
             try:
                 gp_model = self.sub_models[gp_key]
             except KeyError:
-                logger.exception('There was no model initialized for category %s' % str(gp_key))
-                logger.exception('A Dummy Classifier was chosen')
+                logger.info('There was no model initialized for category %s' % str(gp_key))
+                logger.info('A Dummy Classifier was chosen')
                 gp_model = DummyClassifier(constant=0)
             # fit
             gp_model = gp_model.fit(x_group, y_in.values)
@@ -111,8 +111,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
                 if isinstance(gp_model, XGBRegressor):
                     x_group = x_group[gp_model.get_booster().feature_names]
             except KeyError:
-                logger.exception('There was no model initialized for category %s' % str(gp_key))
-                logger.exception('A Dummy Classifier was chosen')
+                logger.info('There was no model initialized for category %s' % str(gp_key))
+                logger.info('A Dummy Classifier was chosen')
                 gp_model = DummyClassifier(constant=0).fit(x_group, [0] * len(x_group))
 
             # predict
