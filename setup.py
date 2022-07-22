@@ -12,7 +12,7 @@ import os
 import platform
 
 import setuptools
-from distutils.core import Command
+from setuptools.command.install import install
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 LINUX_OS = "Linux"
@@ -82,7 +82,7 @@ def jre_install():
         raise Exception("Unknown OS")
 
 
-class AutoMlDependency(Command):
+class AutoMlDependency(install):
     description = "Install JRE"
     user_options = []
 
@@ -93,6 +93,7 @@ class AutoMlDependency(Command):
         pass
 
     def run(self):
+        install.run(self)
         jre_install()
 
 
