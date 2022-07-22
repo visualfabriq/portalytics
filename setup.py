@@ -40,7 +40,7 @@ basic_requires = [
     'pandas==0.24.2; python_version <= "2.7"',
     'pandas>=1.1.0; python_version > "3.3"',
     'numexpr==2.7.3; python_version <= "2.7"',
-    'numexpr>=2.7.1; python_version > "3.3"'
+    'numexpr>=2.7.1; python_version > "3.3"',
     'scipy==1.2.3; python_version <= "2.7"',
     'scipy>=1.5.2; python_version > "3.3"',
     'category-encoders==2.2.2',
