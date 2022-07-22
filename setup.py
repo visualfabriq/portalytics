@@ -42,7 +42,7 @@ basic_requires = [
     'numexpr==2.7.3; python_version <= "2.7"',
     'numexpr>=2.7.1; python_version > "3.3"',
     'scipy==1.2.3; python_version <= "2.7"',
-    'scipy>=1.5.2; python_version > "3.3"',
+    'scipy==1.7.3; python_version > "3.3"',
     'category-encoders==2.2.2',
     # draw libraries
     'matplotlib<=2.2.5; python_version <= "2.7"',
