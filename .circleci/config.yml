@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           name: Install Module
-          command: sudo python setup.py  build_ext --inplace && pip install .
+          command: sudo python setup.py  build_ext --inplace && sudo pip install .
       - run:
           name: Run Tests
           command: pytest -vs tests/
