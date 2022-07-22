@@ -31,42 +31,42 @@ def read(*parts):
 
 # install requires are general and can be downsized to specific requirements per component
 basic_requires = [
-    "pip>=19.3.1",
-    "setuptools>=41.6.0",
-    "joblib==0.13.2; python_version <= '2.7'",
-    "joblib>=0.16.0; python_version > '3.3'",
-    "numpy==1.16.6; python_version <= '2.7'",
-    "numpy>=1.19.1; python_version > '3.3'",
-    "pandas==0.24.2; python_version <= '2.7'",
-    "pandas>=1.1.0; python_version > '3.3'",
-    "numexpr==2.7.3; python_version <= '2.7'",
-    "numexpr>=2.7.1; python_version > '3.3'"
-    "scipy==1.2.3; python_version <= '2.7'",
-    "scipy>=1.5.2; python_version > '3.3'",
-    "category-encoders==2.2.2",
+    'pip>=19.3.1',
+    'setuptools>=41.6.0',
+    'joblib==0.13.2; python_version <= "2.7"',
+    'joblib>=0.16.0; python_version > "3.3"',
+    'numpy==1.16.6; python_version <= "2.7"',
+    'numpy>=1.19.1; python_version > "3.3"',
+    'pandas==0.24.2; python_version <= "2.7"',
+    'pandas>=1.1.0; python_version > "3.3"',
+    'numexpr==2.7.3; python_version <= "2.7"',
+    'numexpr>=2.7.1; python_version > "3.3"'
+    'scipy==1.2.3; python_version <= "2.7"',
+    'scipy>=1.5.2; python_version > "3.3"',
+    'category-encoders==2.2.2',
     # draw libraries
-    "matplotlib<=2.2.5; python_version <= '2.7'",
-    "matplotlib>=3.1.2; python_version > '3.3'",
-    "seaborn==0.9.1; python_version <= '2.7'",
-    "seaborn>=0.10.1; python_version > '3.3'",
+    'matplotlib<=2.2.5; python_version <= "2.7"',
+    'matplotlib>=3.1.2; python_version > "3.3"',
+    'seaborn==0.9.1; python_version <= "2.7"',
+    'seaborn>=0.10.1; python_version > "3.3"',
     # the prediction libraries
-    "scikit-learn==0.20.4; python_version <= '2.7'",
-    "scikit-learn==0.20.4; python_version > '3.3'",
-    "xgboost==0.82; python_version <= '2.7'",
-    "xgboost==0.82; python_version > '3.3'",
-    "statsmodels==0.10.2; python_version <= '2.7'",
-    "statsmodels>=0.12.0; python_version > '3.3'",
-    "ipython==5.8.0; python_version <= '2.7'",
-    "ipython>=7.11.1; python_version > '3.3'",
-    "requests==2.25.1",
-    "tabulate==0.8.10",
-    "-f http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Py.html h2o"
+    'scikit-learn==0.20.4; python_version <= "2.7"',
+    'scikit-learn==0.20.4; python_version > "3.3"',
+    'xgboost==0.82; python_version <= "2.7"',
+    'xgboost==0.82; python_version > "3.3"',
+    'statsmodels==0.10.2; python_version <= "2.7"',
+    'statsmodels>=0.12.0; python_version > "3.3"',
+    'ipython==5.8.0; python_version <= "2.7"',
+    'ipython>=7.11.1; python_version > "3.3"',
+    'requests==2.25.1',
+    'tabulate==0.8.10',
+    '-f http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Py.html h2o'
 ]
 
 tests_requires = [
-    "pytest>=5.3.5; python_version > '3.3'",
-    "pytest==4.6.11; python_version <= '2.7'",
-    "pytest-cov>=2.8.1"
+    'pytest>=5.3.5; python_version > "3.3"',
+    'pytest==4.6.11; python_version <= "2.7"',
+    'pytest-cov>=2.8.1'
 ]
 
 
