@@ -7,11 +7,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install Requirements
-          command: sudo pip install -r requirements.txt
-      - run:
           name: Install Module
-          command: sudo python setup.py build && sudo python setup.py install
+          command: sudo python setup.py build && sudo python setup.py install test
       - run:
           name: Run Tests
           command: pytest -vs tests/
@@ -25,7 +22,7 @@ jobs:
       - checkout
       - run:
           name: Install Module
-          command: sudo python setup.py build && sudo python setup.py install
+          command: sudo python setup.py build && sudo python setup.py install test
       - run:
           name: Run Tests
           command: pytest -vs tests/
