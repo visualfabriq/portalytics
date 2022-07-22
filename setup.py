@@ -65,8 +65,8 @@ basic_requires = [
 
 tests_requires = [
     'pytest>=5.3.5; python_version > "3.3"',
-    'pytest==4.6.11; python_version <= "2.7"',
-    'pytest-cov>=2.8.1'
+    'pytest==4.6.11; python_version <= "2.7"'
+    # 'pytest-cov>=2.8.1'
 ]
 
 
