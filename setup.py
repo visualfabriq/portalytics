@@ -103,7 +103,7 @@ setuptools.setup(
     },
     description="A consistent interface for creating Machine Learning Models compatible with VisualFabriq environment",
     long_description=read("README.md"),
-    tests_require=tests_requires,
+    tests_require=tests_requires + basic_requires,
     extras_require=dict(
         test=tests_requires
     ),

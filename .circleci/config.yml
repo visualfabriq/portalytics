@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           name: Install Module
-          command: sudo python setup.py build # && sudo python setup.py install test
+          command: sudo python setup.py build && sudo python setup.py install test
       - run:
           name: Run Tests
           command: pytest -vs tests/
@@ -22,7 +22,7 @@ jobs:
       - checkout
       - run:
           name: Install Module
-          command: sudo python setup.py build #&& sudo python setup.py install test
+          command: sudo python setup.py build && sudo python setup.py install test
       - run:
           name: Run Tests
           command: pytest -vs tests/
