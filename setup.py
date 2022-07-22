@@ -60,7 +60,7 @@ basic_requires = [
     'ipython>=7.11.1; python_version > "3.3"',
     'requests==2.25.1',
     'tabulate==0.8.10',
-    'http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Py.html'
+    'h2o @ http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Py.html'
 ]
 
 tests_requires = [
