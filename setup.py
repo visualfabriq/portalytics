@@ -86,6 +86,7 @@ from setuptools.command.install import install
 from setuptools.command.develop import develop
 from setuptools.command.egg_info import egg_info
 
+
 def jre_install():
     if CURRENT_OS == LINUX_OS:
         os.system("sudo apt update; apt search openjdk; "
@@ -96,6 +97,7 @@ def jre_install():
         pass
     else:
         raise Exception("Unknown OS")
+
 
 class CustomInstallCommand(install):
     def run(self):
