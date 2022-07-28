@@ -19,6 +19,20 @@ LINUX_OS = "Linux"
 WINDOW_OS = "Windows"
 CURRENT_OS = platform.system()
 
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Information Technology',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: BSD License',
+    'Programming Language :: Python',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Operating System :: Unix',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+]
+
 
 def read(*parts):
     """
@@ -29,10 +43,7 @@ def read(*parts):
         return f.read()
 
 
-# install requires are general and can be downsized to specific requirements per component
-basic_requires = [
-    'pip>=19.3.1',
-    'setuptools>=41.6.0',
+install_requires = [
     'joblib==0.13.2; python_version <= "2.7"',
     'joblib>=0.16.0; python_version > "3.3"',
     'numpy==1.16.6; python_version <= "2.7"',
@@ -60,13 +71,16 @@ basic_requires = [
     'ipython>=7.11.1; python_version > "3.3"',
     'requests==2.25.1',
     'tabulate==0.8.10',
-    'h2o @ http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Py.html',
-    'pytest>=5.3.5; python_version > "3.3"',
-    'pytest==4.6.11; python_version <= "2.7"'
+    'h2o @ http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Py.html'
+]
+tests_requires = [
+    'pytest',
+    'pytest-cov'
 ]
 
-tests_requires = [
-]
+extras_requires = {
+    'test': tests_requires
+}
 
 
 def jre_install():
@@ -97,16 +111,24 @@ class AutoMlDependency(install):
 
 
 setuptools.setup(
-    setup_requires=['pbr', 'pytest-runner'],
-    cmdclass={
-        'automl': AutoMlDependency
-    },
+    name='vf_portalytics',
     description="A consistent interface for creating Machine Learning Models compatible with VisualFabriq environment",
     long_description=read("README.md"),
-    tests_require=tests_requires + basic_requires,
+    author='Christos Tselas',
+    author_email='ctselas@visualfabriq.com',
+    maintainer='Christos Tselas',
+    maintainer_email='ctselas@visualfabriq.com',
+    url='https://github.com/visualfabriq/portalytics',
+    license='GPLv3',
+    setup_requires=['pbr', 'pytest-runner'],
+    # cmdclass={
+    #     'automl': AutoMlDependency
+    # },
+
+    tests_require=tests_requires,
     extras_require=dict(
         test=tests_requires
     ),
-    install_requires=basic_requires,
-    pbr=True
+    install_requires=install_requires,
+    python_requires='>=2.7'
 )
