@@ -82,6 +82,9 @@ extras_requires = {
     'test': tests_requires
 }
 
+from setuptools.command.install import install
+from setuptools.command.develop import develop
+from setuptools.command.egg_info import egg_info
 
 def jre_install():
     if CURRENT_OS == LINUX_OS:
@@ -93,6 +96,23 @@ def jre_install():
         pass
     else:
         raise Exception("Unknown OS")
+
+class CustomInstallCommand(install):
+    def run(self):
+        install.run(self)
+        jre_install()
+
+
+class CustomDevelopCommand(develop):
+    def run(self):
+        develop.run(self)
+        jre_install()
+
+
+class CustomEggInfoCommand(egg_info):
+    def run(self):
+        egg_info.run(self)
+        jre_install()
 
 
 class AutoMlDependency(install):
@@ -116,13 +136,15 @@ setuptools.setup(
     long_description=read("README.md"),
     author='Christos Tselas',
     author_email='ctselas@visualfabriq.com',
-    maintainer='Christos Tselas',
-    maintainer_email='ctselas@visualfabriq.com',
+    maintainer='Carst Vaartjes',
+    maintainer_email='cvaartjes@visualfabriq.com',
     url='https://github.com/visualfabriq/portalytics',
     license='GPLv3',
     setup_requires=['pbr', 'pytest-runner'],
     cmdclass={
-        'automl': AutoMlDependency
+        'install': CustomInstallCommand,
+        'develop': CustomDevelopCommand,
+        'egg_info': CustomEggInfoCommand,
     },
     tests_require=tests_requires,
     extras_require=dict(
