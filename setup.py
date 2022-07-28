@@ -68,7 +68,7 @@ install_requires = [
     'statsmodels==0.10.2; python_version <= "2.7"',
     'statsmodels>=0.12.0; python_version > "3.3"',
     'ipython==5.8.0; python_version <= "2.7"',
-    'ipython>=7.11.1; python_version > "3.3"'
+    'ipython>=7.11.1; python_version > "3.3"',
     'requests==2.25.1',
     'tabulate==0.8.10',
     'h2o==3.36.1.3'
