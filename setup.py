@@ -121,10 +121,9 @@ setuptools.setup(
     url='https://github.com/visualfabriq/portalytics',
     license='GPLv3',
     setup_requires=['pbr', 'pytest-runner'],
-    # cmdclass={
-    #     'automl': AutoMlDependency
-    # },
-
+    cmdclass={
+        'automl': AutoMlDependency
+    },
     tests_require=tests_requires,
     extras_require=dict(
         test=tests_requires
