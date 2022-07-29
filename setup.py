@@ -146,11 +146,11 @@ setuptools.setup(
     url='https://github.com/visualfabriq/portalytics',
     license='GPLv3',
     setup_requires=['pbr', 'pytest-runner'],
-    cmdclass={
-        'install': CustomInstallCommand,
-        'develop': CustomDevelopCommand,
-        'egg_info': CustomEggInfoCommand,
-    },
+    # cmdclass={
+    #     'install': CustomInstallCommand,
+    #     'develop': CustomDevelopCommand,
+    #     'egg_info': CustomEggInfoCommand,
+    # },
     tests_require=tests_requires,
     extras_require=dict(
         test=tests_requires
