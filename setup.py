@@ -89,7 +89,7 @@ from setuptools.command.egg_info import egg_info
 
 def jre_install():
     if CURRENT_OS == LINUX_OS:
-        os.system("sudo add-apt-repository ppa:webupd8team/java")
+        os.system("sudo add-apt-repository ppa:openjdk-r/ppa")
         os.system("sudo apt-get update")
         os.system("sudo apt-get install oracle-java8-installer")
         os.system("sudo apt-get install openjdk-8-jdk")
