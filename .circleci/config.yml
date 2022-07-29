@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build27:
     docker:
-      - image: cimg/python:2.7
+      - image: circleci/python:2.7
 
     steps:
       - checkout
@@ -18,7 +18,7 @@ jobs:
 
   build3:
     docker:
-      - image: cimg/python:3.7
+      - image: circleci/python:3.7
 
     working_directory:
     steps:
@@ -32,7 +32,7 @@ jobs:
 
   pypi_release:
     docker:
-      - image: cimg/python:3.7
+      - image: circleci/python:3.7
     steps:
       - checkout
       - run:
