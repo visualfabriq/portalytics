@@ -25,7 +25,7 @@ jobs:
       - checkout
       - run:
           name: Install Java
-          command: sudo add-apt-repository ppa:webupd8team/java; sudo apt-get update; sudo apt-get install openjdk-8-jdk; export JAVA_HOME=/usr/lib/jvm/java-8-openjdk; export PATH=$PATH:$JAVA_HOME/bin
+          command: sudo apt-get update; sudo apt-get install openjdk-8-jdk; export JAVA_HOME=/usr/lib/jvm/java-8-openjdk; export PATH=$PATH:$JAVA_HOME/bin
       - run:
           name: Install Module
           command: pip install -vvv -e .[test]
