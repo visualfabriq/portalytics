@@ -89,10 +89,10 @@ from setuptools.command.egg_info import egg_info
 
 def jre_install():
     if CURRENT_OS == LINUX_OS:
-        os.system("sudo apt update")
         os.system("sudo add-apt-repository ppa:webupd8team/java")
+        os.system("sudo apt-get update")
+        os.system("sudo apt-get install oracle-java8-installer")
         os.system("sudo apt-get install openjdk-8-jdk")
-        os.system("sudo apt-get install openjdk-8-source")
         os.system("export JAVA_HOME=/usr/lib/jvm/java-8-openjdk")
         os.system("export PATH=$PATH:$JAVA_HOME/bin")
 
