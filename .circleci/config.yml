@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build27:
     docker:
-      - image: cimg/openjdk
+      - image: cimg/openjdk:18.0.1
 
     steps:
       - checkout
