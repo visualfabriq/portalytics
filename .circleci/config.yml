@@ -12,7 +12,7 @@ jobs:
 
       - run:
           name: Install pip
-          command: curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
+          command: sudo easy_install-2.7 pip
       - run:
           name: Install Module
           command: pip install -vvv -e .[test]
