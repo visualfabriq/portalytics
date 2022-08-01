@@ -22,14 +22,14 @@ jobs:
 
   build3:
     docker:
-      - image: circleci/python:3.7
+      - image: cimg/openjdk:18.0.1
 
     working_directory:
     steps:
       - checkout
       - run:
-          name: Install Java
-          command: sudo add-apt-repository ppa:webupd8team/java; sudo apt-get update; sudo apt-get install openjdk-8-jdk; export JAVA_HOME=/usr/lib/jvm/java-8-openjdk; export PATH=$PATH:$JAVA_HOME/bin
+          name: Install Python
+          command:  sudo apt-get update -y; sudo apt-get install -y python3.7; apt-get install python3-pip
       - run:
           name: Install Module
           command: pip install -vvv -e .[test]
