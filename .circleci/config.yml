@@ -29,7 +29,7 @@ jobs:
       - checkout
       - run:
           name: Install Python
-          command:  sudo apt-get update -y; sudo apt-get install -y python3.7; export PATH="$PATH:/usr/local/bin"; python3.7 -m pip install pip
+          command:  sudo apt-get update -y; sudo apt install software-properties-common; sudo add-apt-repository ppa:deadsnakes/ppa; sudo apt-get install -y python3.7; python3.7 -m pip install pip
       - run:
           name: Install Module
           command: python3.7 -m pip install -vvv -e .[test]
