@@ -1,34 +1,26 @@
 version: 2.1
 jobs:
-  build27:
-    docker:
-      - image: circleci/python:2.7
-
-    steps:
-      - checkout
-      - run:
-          name: Install Requirements
-          command: sudo pip install -r requirements.txt
-      - run:
-          name: Install Module
-          command: sudo python setup.py build && sudo python setup.py install
-      - run:
-          name: Run Tests
-          command: pytest -vs tests/
 
   build3:
     docker:
-      - image: circleci/python:3.7
+      - image: cimg/openjdk:18.0.1
 
     working_directory:
     steps:
       - checkout
       - run:
-          name: Install Requirements
-          command: sudo pip install -r requirements.txt
+          name: Install Python
+          command:  |
+            sudo apt-get update -y; 
+            sudo apt install software-properties-common; 
+            sudo add-apt-repository ppa:deadsnakes/ppa; 
+            sudo apt install python3-pip; 
+            sudo apt-get install -y python3.7;
+            sudo apt-get install python3.7-distutils;
+            python3.7 -m pip install pip;
       - run:
-          name: Install Module
-          command: sudo python setup.py build && sudo python setup.py install
+          name: Install Modules
+          command: python3.7 -m pip install -vvv -e .[test]
       - run:
           name: Run Tests
           command: pytest -vs tests/
@@ -80,5 +72,4 @@ workflows:
               only:
                 - master
     jobs:
-      - build27
       - build3
