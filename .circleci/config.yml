@@ -29,10 +29,10 @@ jobs:
       - checkout
       - run:
           name: Install Python
-          command:  sudo apt-get update -y; sudo apt install python3-pip; sudo apt-get install -y python3.7
+          command:  sudo apt-get update -y; sudo apt install python3-pip; sudo apt install -y python3.7
       - run:
           name: Install Module
-          command: python3.7-2to3 -m pip install pip; python3.7-2to3 -m pip install -vvv -e .[test]
+          command: python3.7 -m pip install pip; python3.7 -m pip install -vvv -e .[test]
       - run:
           name: Run Tests
           command: pytest -vs tests/
