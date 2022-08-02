@@ -6,6 +6,7 @@ from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.multioutput import RegressorChain
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from h2o.automl import H2OAutoML
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -23,6 +24,7 @@ POTENTIAL_MODELS = {
     'XGBRegressor': XGBRegressor,
     'XGBRegressorChain': RegressorChain(XGBRegressor),
     'ExtraTreesRegressor': ExtraTreesRegressor,
+    'AutoML': H2OAutoML
 }
 
 
