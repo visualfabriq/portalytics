@@ -7,6 +7,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.multioutput import RegressorChain
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from h2o.automl import H2OAutoML
+import h2o
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -51,6 +52,10 @@ def get_model(params):
                                       if 'base_estimator__' + key in fc_model.get_params()}
                 fc_model.set_params(**initialized_params)
             fc_model.order = params.get('order')
+        elif model_name == 'AutoML':
+            h2o.init()
+            args = {i: params[i] for i in fc_model.__dict__.keys() if i[:1] != '_' and i in params}
+            return fc_model(**args)
         else:
             fc_model = _initialize_model(fc_model, params)
         return fc_model

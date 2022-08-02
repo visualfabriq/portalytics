@@ -1,7 +1,9 @@
 import logging
 
+import h2o
 import pandas as pd
 import numpy as np
+from h2o.automl import H2OAutoML
 
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.dummy import DummyClassifier
@@ -81,7 +83,12 @@ class MultiModel(BaseEstimator, RegressorMixin):
                 logger.info('A Dummy Classifier was chosen')
                 gp_model = DummyClassifier(constant=0)
             # fit
-            gp_model = gp_model.fit(x_group, y_in.values)
+            if isinstance(gp_model, H2OAutoML):
+                train = pd.concat([x_group, y_in], axis=1)
+                train = h2o.H2OFrame(train)
+                gp_model.train(y=y_in.name, x=x_group.columns.tolist(), training_frame=train)
+            else:
+                gp_model = gp_model.fit(x_group, y_in.values)
 
             self.sub_models[gp_key] = gp_model
             print('Model for %s trained' % str(gp_key))
@@ -104,12 +111,15 @@ class MultiModel(BaseEstimator, RegressorMixin):
         results = []
         for gp_key, x_group in groups:
             x_group = x_group.drop(columns=[self.group_col])
+            x_group_index = x_group.index
 
             # Find the sub-model for this group key and fit
             try:
                 gp_model = self.sub_models[gp_key]
                 if isinstance(gp_model, XGBRegressor):
                     x_group = x_group[gp_model.get_booster().feature_names]
+                elif isinstance(gp_model, H2OAutoML):
+                    x_group = h2o.H2OFrame(x_group)
             except KeyError:
                 logger.info('There was no model initialized for category %s' % str(gp_key))
                 logger.info('A Dummy Classifier was chosen')
@@ -117,7 +127,9 @@ class MultiModel(BaseEstimator, RegressorMixin):
 
             # predict
             result = gp_model.predict(x_group)
-            result = pd.DataFrame(index=x_group.index, data=result)
+            result = result.as_data_frame().to_numpy() if isinstance(result, h2o.H2OFrame) else result
+
+            result = pd.DataFrame(index=x_group_index, data=result)
             results.append(result)
         results = pd.concat(results, axis=0)
         results = pd.DataFrame(index=transformed_x.index, data=results, dtype=np.float64)
