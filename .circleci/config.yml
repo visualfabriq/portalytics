@@ -12,8 +12,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install Modules
-          command: sudo python setup.py build -vvv -e .[test] && sudo python -m pip install -vvv -e .[test]
+          name: Install Requirements
+          command: sudo pip install -r requirements.txt
+      - run:
+          name: Install Module
+          command: sudo python setup.py build && sudo python setup.py install
       - run:
           name: Run Tests
           command: pytest -vs tests/
