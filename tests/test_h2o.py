@@ -142,3 +142,14 @@ class TestVfH2O:
         # Compare with the score we got before
         saved_model_score = abs(r2_score(saved_predictions.values, y_test.values))
         assert saved_model_score == pytest.approx(score)
+
+
+
+        # https://groups.google.com/g/h2ostream/c/FaJm57Rbkmg
+        lb = aml.leaderboard
+        model_ids = list(lb['model_id'].as_data_frame().iloc[:, 0])
+        out_path = "."
+        for m_id in model_ids:
+            mdl = h2o.get_model(m_id)
+            h2o.save_model(model=mdl, path=out_path, force=True)
+        # h2o.save_model(model=aml, filename='my_aml')
