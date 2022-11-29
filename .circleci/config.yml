@@ -1,34 +1,18 @@
 version: 2.1
 jobs:
-  build27:
+  build-and-test:
+    parameters:
+      runtime:
+        description: Python runtime version
+        type: string
+        default: "3.7"
     docker:
-      - image: circleci/python:2.7
-
+      - image: cimg/python:<<parameters.runtime>>
     steps:
       - checkout
       - run:
-          name: Install Requirements
-          command: sudo pip install -r requirements.txt
-      - run:
-          name: Install Module
-          command: sudo python setup.py build && sudo python setup.py install
-      - run:
-          name: Run Tests
-          command: pytest -vs tests/
-
-  build3:
-    docker:
-      - image: circleci/python:3.7
-
-    working_directory:
-    steps:
-      - checkout
-      - run:
-          name: Install Requirements
-          command: sudo pip install -r requirements.txt
-      - run:
-          name: Install Module
-          command: sudo python setup.py build && sudo python setup.py install
+          name: Install Modules
+          command: sudo python -m pip install -vvv -e .[test]
       - run:
           name: Run Tests
           command: pytest -vs tests/
@@ -53,11 +37,19 @@ workflows:
 
   build-and-release:
     jobs:
-      - build27:
+      - build-and-test:
+          name: py27
+          runtime: "2.7"
           filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
-      - build3:
+      - build-and-test:
+          name: py37
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+      - build-and-test:
+          name: py310
           filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
