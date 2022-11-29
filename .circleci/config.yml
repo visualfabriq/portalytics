@@ -13,7 +13,7 @@ jobs:
       - checkout
       - run:
           name: Install Modules
-          command: sudo python setup.py build && sudo python -m pip install -vvv -e .[test]
+          command: sudo python setup.py build -vvv -e .[test] && sudo python -m pip install -vvv -e .[test]
       - run:
           name: Run Tests
           command: pytest -vs tests/
