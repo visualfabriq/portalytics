@@ -27,9 +27,10 @@ classifiers = [
     'Programming Language :: Python',
     'Topic :: Software Development :: Libraries :: Python Modules',
     'Operating System :: Unix',
+    'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.10',
 ]
 
 
@@ -59,9 +60,11 @@ install_requires = [
     'matplotlib>=3.1.2; python_version > "3.3"',
     'seaborn==0.9.1; python_version <= "2.7"',
     'seaborn>=0.10.1; python_version > "3.3"',
-    # the prediction libraries
+    # the prediction libraries;
+    # sklearn is pinned because if a user pickles a model with a different version, the unpickling creates issues
     'scikit-learn==0.20.4; python_version <= "2.7"',
-    'scikit-learn==0.20.4; python_version > "3.3"',
+    'scikit-learn==0.20.4; python_version < "3.10"',
+    'scikit-learn==1.1.3; python_version == "3.10"',
     'xgboost==0.82; python_version <= "2.7"',
     'xgboost==0.82; python_version > "3.3"',
     'statsmodels==0.10.2; python_version <= "2.7"',
