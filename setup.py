@@ -90,7 +90,6 @@ setuptools.setup(
     maintainer='Carst Vaartjes',
     maintainer_email='cvaartjes@visualfabriq.com',
     url='https://github.com/visualfabriq/portalytics',
-    license='GPLv3',
     setup_requires=['pbr', 'pytest-runner'],
     tests_require=tests_requires,
     extras_require=dict(
