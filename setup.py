@@ -95,6 +95,5 @@ setuptools.setup(
     extras_require=dict(
         test=tests_requires
     ),
-    pbr=True,
     install_requires=install_requires
 )
