@@ -4,7 +4,7 @@
 #
 # License: GPL
 # Created: June 11, 2017
-#       Author:  Carst Vaartjes - cvaartjes@visualfabriq.com
+#      Author:  Carst Vaartjes - cvaartjes@visualfabriq.com
 #
 ########################################################################
 import codecs
