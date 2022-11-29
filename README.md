@@ -39,3 +39,20 @@ It is a custom sklearn transformer that contains one transformer for each group 
 
 MultiTransformer can support every sklearn based transformer, the only thing that is need to be done is to extend 
 [`POTENTIAL_TRANSFORMER`](./vf_portalytics/ml_helpers.py) dictionary. Feel free to raise a PR. 
+
+## AutoML
+For AutoML portalytics uses [`H2O`](https://docs.h2o.ai/h2o/latest-stable/h2o-docs/index.html). 
+H2O requires Java, consequently to use AutoML with portalytics java needs to be installed.
+
+For Linux you can do:
+
+```angular2html
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get update
+sudo apt-get install openjdk-8-jdk
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk
+export PATH=$PATH:$JAVA_HOME/bin
+```
+
+
+For more information installing Java follow https://www.java.com/en/download/help/download_options.html
