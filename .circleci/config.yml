@@ -1,4 +1,5 @@
 version: 2.1
+
 jobs:
   build-and-test:
     parameters:
@@ -7,7 +8,7 @@ jobs:
         type: string
         default: "3.7"
     docker:
-      - image: cimg/python:<<parameters.runtime>>
+      - image: circleci/python:<<parameters.runtime>>
     steps:
       - checkout
       - run:
