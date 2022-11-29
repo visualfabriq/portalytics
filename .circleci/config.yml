@@ -46,6 +46,9 @@ workflows:
               only: /[0-9]+(\.[0-9]+)*/
       - build-and-test:
           name: py37
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
       - build-and-test:
           name: py310
           runtime: "3.10"
@@ -54,8 +57,9 @@ workflows:
               only: /[0-9]+(\.[0-9]+)*/
       - pypi_release:
           requires:
-            - build27
-            - build3
+            - py27
+            - py37
+            - py310
           filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
@@ -71,5 +75,11 @@ workflows:
               only:
                 - master
     jobs:
-      - build27
-      - build3
+      - build-and-test:
+          name: py27
+          runtime: "2.7"
+      - build-and-test:
+          name: py37
+      - build-and-test:
+          name: py310
+          runtime: "3.10"
