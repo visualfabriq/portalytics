@@ -51,7 +51,7 @@ def test_multi_model():
         },
     }
 
-    # Initiliaze model
+    # Initialize model
     model = MultiModel(group_col=cat_feature, clusters=clusters, params=params,
                        selected_features=selected_features, nominals=nominal_features, ordinals=ordinal_features)
     model.fit(train_x, train_y)
