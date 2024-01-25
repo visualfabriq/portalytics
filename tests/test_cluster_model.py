@@ -8,7 +8,7 @@ import pandas as pd
 
 from collections import defaultdict
 from numpy.random import randint
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
