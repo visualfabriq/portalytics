@@ -34,7 +34,7 @@ jobs:
           command: sudo python setup.py sdist bdist_wheel
       - run:
           name: Upload to Pypi
-          command: twine upload --skip-existing --non-interactive -u __token__ -p $PYPI_API_TOKEN dist/*
+          command: sudo twine upload --skip-existing --non-interactive -u __token__ -p $PYPI_API_TOKEN dist/*
 
 workflows:
   version: 2.1
