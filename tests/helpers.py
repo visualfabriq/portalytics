@@ -23,12 +23,10 @@ def make_dataset():
     n_features = 5
     x1, y1 = make_regression_dataset(n_samples=100, n_features=n_features, n_informative=3, category='A')
     x2, y2 = make_regression_dataset(n_samples=150, n_features=n_features, n_informative=4, category='B')
-    x3, y3 = make_regression_dataset(n_samples=80, n_features=n_features, n_informative=5, category='C')
-    x4, y4 = make_regression_dataset(n_samples=120, n_features=n_features, n_informative=1, category='D')
 
     # combine into one dataset
-    total_x = pd.concat([x1, x2, x3, x4], axis=0, ignore_index=True).reset_index(drop=True)
-    total_y = pd.concat([y1, y2, y3, y4], axis=0, ignore_index=True).reset_index(drop=True)
+    total_x = pd.concat([x1, x2], axis=0, ignore_index=True).reset_index(drop=True)
+    total_y = pd.concat([y1, y2], axis=0, ignore_index=True).reset_index(drop=True)
 
     # make two random features categorical
     labels = ['g1', 'g2', 'g3']
