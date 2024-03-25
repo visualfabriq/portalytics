@@ -10,7 +10,6 @@ def test_multi_model():
     total_x, total_y = make_dataset()
 
     # Declare basic parameters
-    target = 'target'
     cat_feature = 'category'
     feature_col_list = total_x.columns.drop(cat_feature)
     clusters = total_x[cat_feature].unique()
@@ -38,17 +37,7 @@ def test_multi_model():
             'model_name': 'XGBRegressor',
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
-        },
-        'C': {
-            'model_name': 'XGBRegressor',
-            'transformer_nominal': 'TargetEncoder',
-            'transformer_ordinal': 'OrdinalEncoder'
-        },
-        'D': {
-            'model_name': 'XGBRegressor',
-            'transformer_nominal': 'TargetEncoder',
-            'transformer_ordinal': 'OrdinalEncoder'
-        },
+        }
     }
 
     # Initialize model
@@ -59,9 +48,8 @@ def test_multi_model():
 
     # check if produces 1-1 results
     assert (test_y.index == pred_test_y.index).all()
-
     # check if we predict a sample from an other category
-    test_sample_0 = pd.DataFrame(test_x.loc[0].copy()).T
+    test_sample_0 = pd.DataFrame(test_x.iloc[0].copy()).T
     test_sample_0['category'] = 'New_Category'
     pred_test_sample_0 = model.predict(test_sample_0)
     assert (pred_test_sample_0.values == 0).all()
@@ -80,9 +68,6 @@ def test_multi_model_to_single_model():
     train_x[cat_feature] = 'group_0'
     clusters = train_x[cat_feature].unique()
     feature_col_list = train_x.columns.drop(cat_feature)
-
-
-    print('Clusters: {}'.format(clusters))
 
     # keep all the features
     selected_features = {}
@@ -115,7 +100,6 @@ def test_multi_model_with_double_target():
     total_x, total_y = make_dataset()
 
     # Declare basic parameters
-    target = 'target'
     cat_feature = 'category'
     feature_col_list = total_x.columns.drop(cat_feature)
     clusters = total_x[cat_feature].unique()
@@ -128,7 +112,6 @@ def test_multi_model_with_double_target():
 
     # make the target double
     train_y = pd.DataFrame({'target_1': train_y, 'target_2': 2*train_y})
-    test_y = pd.DataFrame({'target_1': test_y, 'target_2': 2*test_y})
 
     # keep all the features
     selected_features = {}
@@ -140,11 +123,12 @@ def test_multi_model_with_double_target():
     # imitate params given from hyper optimization tuning
     params = {
         'A': {
-            'model_name': 'ExtraTreesRegressor',
+            'model_name': 'XGBRegressorChain',
+            'order': [0, 1],
             'max_depth': 2,
             'min_samples_leaf': 400,
             'min_samples_split': 400,
-            'n_estimators': 10,
+            'n_estimators': 11,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         },
@@ -156,26 +140,7 @@ def test_multi_model_with_double_target():
             'n_estimators': 10,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
-        },
-        'C': {
-            'model_name': 'ExtraTreesRegressor',
-            'max_depth': 2,
-            'min_samples_leaf': 400,
-            'min_samples_split': 400,
-            'n_estimators': 10,
-            'transformer_nominal': 'TargetEncoder',
-            'transformer_ordinal': 'OrdinalEncoder'
-        },
-        'D': {
-            'model_name': 'XGBRegressorChain',
-            'order': [0, 1],
-            'max_depth': 2,
-            'min_samples_leaf': 400,
-            'min_samples_split': 400,
-            'n_estimators': 11,
-            'transformer_nominal': 'TargetEncoder',
-            'transformer_ordinal': 'OrdinalEncoder'
-        },
+        }
     }
 
     # Initiliaze model
@@ -185,5 +150,5 @@ def test_multi_model_with_double_target():
     pred_test_y = model.predict(test_x)
 
     assert pred_test_y.shape[1] == 2
-    assert model.sub_models['C'].n_estimators == 10
-    assert model.sub_models['D'].base_estimator.n_estimators == 11
+    assert model.sub_models['B'].n_estimators == 10
+    assert model.sub_models['A'].base_estimator.n_estimators == 11

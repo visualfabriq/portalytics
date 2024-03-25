@@ -39,15 +39,7 @@ def test_multi_transformer_categorical_features():
         'B': {
             'transformer_nominal': 'OneHotEncoder',
             'transformer_ordinal': 'TargetEncoder'
-        },
-        'C': {
-            'transformer_nominal': 'OneHotEncoder',
-            'transformer_ordinal': 'JamesSteinEncoder'
-        },
-        'D': {
-            'transformer_nominal': 'JamesSteinEncoder',
-            'transformer_ordinal': 'OrdinalEncoder'
-        },
+        }
     }
 
     # Initiliaze transformer
