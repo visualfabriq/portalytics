@@ -31,10 +31,12 @@ def test_multi_model():
         'A': {
             'model_name': 'XGBRegressor',
             'transformer_nominal': 'TargetEncoder',
+            'n_estimators': 3,
             'transformer_ordinal': 'OrdinalEncoder'
         },
         'B': {
             'model_name': 'XGBRegressor',
+            'n_estimators': 3,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         }
@@ -80,6 +82,7 @@ def test_multi_model_to_single_model():
     params = {
         'group_0': {
             'model_name': 'XGBRegressor',
+            'n_estimators': 5,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'},
     }
@@ -128,7 +131,7 @@ def test_multi_model_with_double_target():
             'max_depth': 2,
             'min_samples_leaf': 400,
             'min_samples_split': 400,
-            'n_estimators': 11,
+            'n_estimators': 6,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         },
@@ -137,7 +140,7 @@ def test_multi_model_with_double_target():
             'max_depth': 2,
             'min_samples_leaf': 400,
             'min_samples_split': 400,
-            'n_estimators': 10,
+            'n_estimators': 5,
             'transformer_nominal': 'TargetEncoder',
             'transformer_ordinal': 'OrdinalEncoder'
         }
@@ -150,5 +153,5 @@ def test_multi_model_with_double_target():
     pred_test_y = model.predict(test_x)
 
     assert pred_test_y.shape[1] == 2
-    assert model.sub_models['B'].n_estimators == 10
-    assert model.sub_models['A'].base_estimator.n_estimators == 11
+    assert model.sub_models['B'].n_estimators == 5
+    assert model.sub_models['A'].base_estimator.n_estimators == 6
