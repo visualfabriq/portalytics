@@ -61,7 +61,7 @@ _ordered_column_list = [
     end_date_col,
     baseline_col
 ]
-_ordered_column_list.append(promo_features)
+_ordered_column_list.extend(promo_features)
 metadata = {
     "features": dict(zip(_ordered_column_list, [[]] * len(_ordered_column_list))),
     "target": {"total_ef_qty": []},
