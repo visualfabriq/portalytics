@@ -1,12 +1,9 @@
 import numpy as np
 import os
-import pandas as pd
 
 
 # ----------- paths & file format ----------
-"""
-Replaced paths with placeholder string. Set these paths accordingly on Terrain model init.
-"""
+# Replaced paths with placeholder string. Set these paths accordingly on Terrain model init.
 data_file_format = '<set_on_init>'
 model_artifacts_path = os.path.expanduser(
     "<set_path_on_init>"
