@@ -59,8 +59,7 @@ _ordered_column_list = [
     item_col,
     start_date_col,
     end_date_col,
-    baseline_col,
-    promo_features,
+    baseline_col
 ]
 _ordered_column_list.append(promo_features)
 metadata = {
