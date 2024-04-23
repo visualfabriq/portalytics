@@ -1,21 +1,22 @@
-#!/usr/bin/env python
-
 import numpy as np
 import os
-import subprocess
+import pandas as pd
+
 
 # ----------- paths & file format ----------
-data_file_format = "parquet"
+"""
+Replaced paths with placeholder string. Set these paths accordingly on Terrain model init.
+"""
+data_file_format = '<set_on_init>'
 model_artifacts_path = os.path.expanduser(
-    "~/onedrive/RGM/VF_integration/terrain-artifacts"
+    "<set_path_on_init>"
 )
 model_data_path = os.path.expanduser(
-    "~/onedrive/RGM/VF_integration/terrain-integration-tables"
+    "<set_path_on_init>"
 )
-coefs_path = f"{model_data_path}/coefficients_cpe_by_prod_hash_with_mults.parquet"
-account_id_mapper_path = f"{model_data_path}/account_id_to_cpe_map.parquet"
-pid_mapper_path = f"{model_data_path}/pid_to_prod_hash_map.parquet"
-
+coefs_path = f"{model_data_path}/<set_path_on_init>"
+account_id_mapper_path = f"{model_data_path}/<set_path_on_init>"
+pid_mapper_path = f"{model_data_path}/<set_path_on_init>"
 
 # -------------- column names --------------
 # VF call columns
@@ -34,23 +35,10 @@ customer_col = "cpe_1"
 prod_line_col = "prod_line_hash"
 promo_coefs = ["discount_coef", "display_coef", "feature_coef"]
 
-# ----------------- misc -----------------
-try:
-    _version = (
-        subprocess.check_output(["git", "rev-parse", "--short=10", "HEAD"])
-        .decode()
-        .strip()
-    )
-    _version = f"_{_version[:8]}"
-except subprocess.CalledProcessError:
-    _version = ""
-
-vf_id = f"terrain_module{_version}"
-
 
 # ------------- model xforms -----------
 def _xform_tpr(x, y):
-    return x**y  # This is if they give x = consumer promo price / base price ratio
+    return x ** y  # This is if they give x = consumer promo price / base price ratio
     # return (1 - x / 100)) ** y # This is if they give x as a price discount in %tage
 
 
@@ -76,7 +64,7 @@ _ordered_column_list = [
 ]
 metadata = {
     "features": dict(zip(_ordered_column_list, [[]] * len(_ordered_column_list))),
-    "target": "total_ef_qty",
+    "target": {"total_ef_qty": []},
     "labels": {},
     "one_hot_encode": False,
     "ordered_column_list": _ordered_column_list,

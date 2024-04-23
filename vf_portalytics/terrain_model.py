@@ -1,10 +1,8 @@
-#!/usr/bin/env python
-
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
 
-import terrain_config as config
+import vf_portalytics.terrain_config as config
 
 
 def _get_dataframe(file_format, obj, key_cols=None):
