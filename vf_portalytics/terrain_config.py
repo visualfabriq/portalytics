@@ -14,9 +14,9 @@ model_artifacts_path = os.path.expanduser(
 model_data_path = os.path.expanduser(
     "<set_path_on_init>"
 )
-coefs_path = f"{model_data_path}/<set_path_on_init>"
-account_id_mapper_path = f"{model_data_path}/<set_path_on_init>"
-pid_mapper_path = f"{model_data_path}/<set_path_on_init>"
+coefs_path = "{}/<set_path_on_init>".format(model_data_path)
+account_id_mapper_path = "{}/<set_path_on_init>".format(model_data_path)
+pid_mapper_path = "{}/<set_path_on_init>".format(model_data_path)
 
 # -------------- column names --------------
 # VF call columns
