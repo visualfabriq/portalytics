@@ -29,13 +29,13 @@ def generate_predict_df(n):
 
 
 def generate_model_paths(model_data_path):
-    coefs.to_csv(f'{model_data_path}/coefs.csv')
-    account_id_map.to_csv(f'{model_data_path}/account_id_map.csv')
-    pid_map.to_csv(f'{model_data_path}/pid_map.csv')
+    coefs.to_csv('{}/coefs.csv'.format(model_data_path))
+    account_id_map.to_csv('{}/account_id_map.csv'.format(model_data_path))
+    pid_map.to_csv('{}/pid_map.csv'.format(model_data_path))
 
-    coefs_path = f"{model_data_path}/coefs.csv"
-    account_id_mapper_path = f"{model_data_path}/account_id_map.csv"
-    pid_mapper_path = f"{model_data_path}/pid_map.csv"
+    coefs_path = '{}/coefs.csv'.format(model_data_path)
+    account_id_mapper_path = '{}/account_id_map.csv'.format(model_data_path)
+    pid_mapper_path = '{}/pid_map.csv'.format(model_data_path)
 
     return coefs_path, account_id_mapper_path, pid_mapper_path
 
@@ -62,8 +62,8 @@ def test_terrain_model_predict(tmpdir):
     terrain_model = Terrain(coefs_path=coefs_path, file_format='csv', account_id_mapper_path=account_id_mapper_path,
                             pid_mapper_path=pid_mapper_path)
     model_id = 'terrain_test'
-    joblib.dump(terrain_model, f"{model_data_path}/{model_id}.pkl", compress=3)
-    with open(f"{model_data_path}/{model_id}.meta", "w") as metadata_file:
+    joblib.dump(terrain_model, '{0}/{1}.pkl'.format(model_data_path, model_id), compress=3)
+    with open('{0}/{1}.meta'.format(model_data_path, model_id), "w") as metadata_file:
         json.dump(metadata, metadata_file)
 
     model = PredictionModel(model_id, model_data_path)
