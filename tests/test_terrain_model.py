@@ -38,17 +38,12 @@ pid_map = pd.DataFrame({config.prod_line_col: prod_hash,
 
 def generate_predict_df(n=TEST_RANGE):
     df = pd.DataFrame({
-        'promo': [random.randrange(0, round(n / 2), 1) for i in range(n)],
         config.account_id_col: account_index,
-        'pid': product_index,
-        'consumer_length': [random.randint(1, 5) for i in range(n)],
+        config.item_col: product_index,
         config.baseline_col: [random.randint(10, 10000) for i in range(n)],
-        'discount_perc': [random.randrange(10, 50, 10) for i in range(n)],
-        'second_placement_perc': [random.choice([0, 50, 60, 70]) for i in range(n)],
-        'feature_perc': [random.choice([0, 50]) for i in range(n)],
-        'promoted_price_ratio': [random.uniform(0.01, 0.5) for i in range(n)],
-        'on_display': [0.0] * n,
-        'on_feature': [0.0] * n
+        config.discount_col: [random.uniform(0.01, 0.5) for i in range(n)],
+        config.display_col: [0.0] * n,
+        config.feature_col: [0.0] * n
     })
 
     return df
