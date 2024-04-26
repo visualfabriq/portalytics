@@ -2,9 +2,10 @@ import string
 import random
 import joblib
 import json
+import pytest
 import pandas as pd
 
-from vf_portalytics.terrain_model import Terrain
+from vf_portalytics.terrain_model import _get_dataframe, Terrain
 import vf_portalytics.terrain_config as config
 from vf_portalytics.model import PredictionModel
 
@@ -61,6 +62,33 @@ def generate_model_paths(model_data_path):
     return coefs_path, account_id_mapper_path, pid_mapper_path
 
 
+def test_get_dataframe(tmpdir):
+    model_data_path = str(tmpdir.mkdir('model_data'))
+    coefs_path, account_id_mapper_path, pid_mapper_path = generate_model_paths(model_data_path)
+
+    obj = _get_dataframe('parquet', coefs_path)
+    assert isinstance(obj, pd.DataFrame)
+
+    with pytest.raises(ValueError):
+        _get_dataframe('parquet', 1)
+
+
+def test_terrain_model_predict(tmpdir):
+    model_data_path = str(tmpdir.mkdir('model_data'))
+    coefs_path, account_id_mapper_path, pid_mapper_path = generate_model_paths(model_data_path)
+
+    terrain_model = Terrain(coefs_path=coefs_path, file_format='parquet', account_id_mapper_path=account_id_mapper_path,
+                            pid_mapper_path=pid_mapper_path)
+    df = generate_predict_df()
+    pred = terrain_model.predict(df)
+    assert not (pred == df[config.baseline_col]).all()
+
+    # Test with non-mapped input data, resulting in factor of 1.0
+    df[config.account_id_col] = ['FAKE_ACCOUNT'] * TEST_RANGE
+    pred = terrain_model.predict(df)
+    assert (pred == df[config.baseline_col]).all()
+
+
 def test_terrain_with_prediction_model(tmpdir):
     model_data_path = str(tmpdir.mkdir('model_data'))
     coefs_path, account_id_mapper_path, pid_mapper_path = generate_model_paths(model_data_path)
@@ -80,18 +108,6 @@ def test_terrain_with_prediction_model(tmpdir):
     assert not (pred == df[config.baseline_col]).all()
 
 
-def test_terrain_model_predict(tmpdir):
-    model_data_path = str(tmpdir.mkdir('model_data'))
-    coefs_path, account_id_mapper_path, pid_mapper_path = generate_model_paths(model_data_path)
-
-    terrain_model = Terrain(coefs_path=coefs_path, file_format='parquet', account_id_mapper_path=account_id_mapper_path,
-                            pid_mapper_path=pid_mapper_path)
-    df = generate_predict_df()
-    pred = terrain_model.predict(df)
-
-    assert not (pred == df[config.baseline_col]).all()
-
-
 def test_get_factor(tmpdir):
     model_data_path = str(tmpdir.mkdir('model_data'))
     coefs_path, account_id_mapper_path, pid_mapper_path = generate_model_paths(model_data_path)
@@ -103,3 +119,5 @@ def test_get_factor(tmpdir):
     factor = terrain_model._get_factor(df)
 
     assert factor != 0
+
+
