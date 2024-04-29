@@ -23,18 +23,18 @@ class Terrain(BaseEstimator):
 
     def __init__(
         self,
-        account_id_col=config.account_id_col,
-        account_id_mapper_path=config.account_id_mapper_path,
-        baseline_col=config.baseline_col,
-        coefs_path=config.coefs_path,
-        customer_col=config.customer_col,
-        file_format=config.data_file_format,
-        item_col=config.item_col,
+        account_id_col=config.ACCOUNT_ID_COL,
+        account_id_mapper_path=config.ACCOUNT_ID_MAPPER_PATH,
+        baseline_col=config.BASELINE_COL,
+        coefs_path=config.COEFS_PATH,
+        customer_col=config.CUSTOMER_COL,
+        file_format=config.DATA_FILE_FORMAT,
+        item_col=config.ITEM_COL,
         model_transforms=config.transforms,
-        pid_mapper_path=config.pid_mapper_path,
-        prod_line_col=config.prod_line_col,
-        promo_coefs=config.promo_coefs,
-        promo_features=config.promo_features,
+        pid_mapper_path=config.PID_MAPPER_PATH,
+        prod_line_col=config.PROD_LINE_COL,
+        promo_coefs=config.PROMO_COEFS,
+        promo_features=config.PROMO_FEATURES,
     ):
         """Initialize Terrain model.
 

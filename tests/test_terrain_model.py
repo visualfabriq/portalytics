@@ -20,7 +20,7 @@ def id_generator(size=24, chars=string.ascii_lowercase + string.digits):
 product_index = [id_generator(6) for i in range(TEST_RANGE)]
 account_index = [id_generator(7) for i in range(TEST_RANGE)]
 prod_hash = [id_generator(5) for i in range(TEST_RANGE)]
-coef_index = pd.MultiIndex.from_product([TEST_ACCOUNTS, prod_hash], names=[config.customer_col, config.prod_line_col])
+coef_index = pd.MultiIndex.from_product([TEST_ACCOUNTS, prod_hash], names=[config.CUSTOMER_COL, config.PROD_LINE_COL])
 
 coefs = pd.DataFrame({'discount_coef': [random.uniform(-1, -5) for i in range(len(coef_index))],
                       'display_coef': [random.uniform(0.05, 0.30) for i in range(len(coef_index))],
@@ -28,23 +28,23 @@ coefs = pd.DataFrame({'discount_coef': [random.uniform(-1, -5) for i in range(le
                       }, index=coef_index
                      )
 
-account_id_map = pd.DataFrame({config.customer_col: TEST_ACCOUNTS,
+account_id_map = pd.DataFrame({config.CUSTOMER_COL: TEST_ACCOUNTS,
                                }, index=account_index
                               )
 
-pid_map = pd.DataFrame({config.prod_line_col: prod_hash,
+pid_map = pd.DataFrame({config.PROD_LINE_COL: prod_hash,
                         }, index=product_index
                        )
 
 
 def generate_predict_df(n=TEST_RANGE):
     df = pd.DataFrame({
-        config.account_id_col: account_index,
-        config.item_col: product_index,
-        config.baseline_col: [random.randint(10, 10000) for i in range(n)],
-        config.discount_col: [random.uniform(0.01, 0.5) for i in range(n)],
-        config.display_col: [0.0] * n,
-        config.feature_col: [0.0] * n
+        config.ACCOUNT_ID_COL: account_index,
+        config.ITEM_COL: product_index,
+        config.BASELINE_COL: [random.randint(10, 10000) for i in range(n)],
+        config.DISCOUNT_COL: [random.uniform(0.01, 0.5) for i in range(n)],
+        config.DISPLAY_COL: [0.0] * n,
+        config.FEATURE_COL: [0.0] * n
     })
 
     return df
@@ -81,12 +81,12 @@ def test_terrain_model_predict(tmpdir):
                             pid_mapper_path=pid_mapper_path)
     df = generate_predict_df()
     pred = terrain_model.predict(df)
-    assert not (pred == df[config.baseline_col]).all()
+    assert not (pred == df[config.BASELINE_COL]).all()
 
     # Test with non-mapped input data, resulting in factor of 1.0
-    df[config.account_id_col] = ['FAKE_ACCOUNT'] * TEST_RANGE
+    df[config.ACCOUNT_ID_COL] = ['FAKE_ACCOUNT'] * TEST_RANGE
     pred = terrain_model.predict(df)
-    assert (pred == df[config.baseline_col]).all()
+    assert (pred == df[config.BASELINE_COL]).all()
 
 
 def test_terrain_with_prediction_model(tmpdir):
@@ -105,7 +105,7 @@ def test_terrain_with_prediction_model(tmpdir):
     df = generate_predict_df()
     pred = model.predict(df)
 
-    assert not (pred == df[config.baseline_col]).all()
+    assert not (pred == df[config.BASELINE_COL]).all()
 
 
 def test_get_factor(tmpdir):
