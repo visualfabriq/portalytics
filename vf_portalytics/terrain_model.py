@@ -23,15 +23,15 @@ class Terrain(BaseEstimator):
 
     def __init__(
         self,
+        account_id_mapper_path,
+        coefs_path,
+        file_format,
+        pid_mapper_path,
         account_id_col=config.ACCOUNT_ID_COL,
-        account_id_mapper_path=config.ACCOUNT_ID_MAPPER_PATH,
         baseline_col=config.BASELINE_COL,
-        coefs_path=config.COEFS_PATH,
         customer_col=config.CUSTOMER_COL,
-        file_format=config.DATA_FILE_FORMAT,
         item_col=config.ITEM_COL,
         model_transforms=config.transforms,
-        pid_mapper_path=config.PID_MAPPER_PATH,
         prod_line_col=config.PROD_LINE_COL,
         promo_coefs=config.PROMO_COEFS,
         promo_features=config.PROMO_FEATURES,
@@ -39,23 +39,20 @@ class Terrain(BaseEstimator):
         """Initialize Terrain model.
 
         Args:
+            account_id_mapper_path (str): Path to account id mapper.
+            coefs_path (str): Path to coefficient data.
+            file_format (str): File format of baseline data. Should be one of "parquet",
+                "csv", or "json" or a ValueError is raised.
+            pid_mapper_path (str): Path to product id mapper.
             account_id_col (str, optional): Name of account id column in VF call data.
-            account_id_mapper_path (str, optional): Path to account id mapper. Defaults
-                to config.account_id_mapper_path.
             baseline_col (str, optional): Name of baseline column in VF call data.
                 Defaults to config.baseline_col.
-            coefs_path (str, optional): Path to coefficient data. Defaults to
-                config.coefs_path.
             customer_col (str, optional): Name of customer column in coef table.
                 Defaults to config.customer_col.
-            file_format (str, optional): File format of baseline data. Defaults to
-                config.data_file_format. Should be one of "parquet", "csv", or "json".
             item_col (str, optional): Name of item column in VF call data. Defaults to
                 config.item_col.
             model_transforms (dict, optional): Dictionary of model transforms to be used
                 in predict method. Defaults to config.transforms.
-            pid_mapper_path (str, optional): Path to product id mapper. Defaults to
-                config.pid_mapper_path.
             prod_line_col (str, optional): Name of product line column in coef table.
             promo_coefs (list, optional): Names of promo coefficients. Defaults to
                 config.promo_coefs.
@@ -130,7 +127,6 @@ class Terrain(BaseEstimator):
             prod_line = self.pid_mapper.loc[
                 getattr(tup, self.item_col), self.prod_line_col
             ]
-
         except KeyError:
             return 1.0
         try:

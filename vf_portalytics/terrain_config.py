@@ -2,19 +2,6 @@ import numpy as np
 import os
 
 
-# ----------- paths & file format ----------
-# Replaced paths with placeholder string. Set these paths accordingly on Terrain model init.
-DATA_FILE_FORMAT = '<set_on_init>'
-MODEL_ARTIFACTS_PATH = os.path.expanduser(
-    "<set_path_on_init>"
-)
-MODEL_DATA_PATH = os.path.expanduser(
-    "<set_path_on_init>"
-)
-COEFS_PATH = "{}/<set_path_on_init>".format(MODEL_DATA_PATH)
-ACCOUNT_ID_MAPPER_PATH = "{}/<set_path_on_init>".format(MODEL_DATA_PATH)
-PID_MAPPER_PATH = "{}/<set_path_on_init>".format(MODEL_DATA_PATH)
-
 # -------------- column names --------------
 # VF call columns
 ACCOUNT_ID_COL = "account_id"
@@ -35,7 +22,7 @@ PROMO_COEFS = ["discount_coef", "display_coef", "feature_coef"]
 
 # ------------- model xforms -----------
 def _xform_tpr(x, y):
-    return x ** y  # This is if they give x = consumer promo price / base price ratio
+    return x**y  # This is if they give x = consumer promo price / base price ratio
 
 
 def _xform_other(x, y):
@@ -54,7 +41,7 @@ _ordered_column_list = [
     ITEM_COL,
     START_DATE_COL,
     END_DATE_COL,
-    BASELINE_COL
+    BASELINE_COL,
 ]
 _ordered_column_list.extend(PROMO_FEATURES)
 metadata = {
