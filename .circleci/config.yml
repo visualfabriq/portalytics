@@ -6,7 +6,7 @@ jobs:
       runtime:
         description: Python runtime version
         type: string
-        default: "3.7"
+        default: "3.11"
     docker:
       - image: circleci/python:<<parameters.runtime>>
     steps:
@@ -23,7 +23,7 @@ jobs:
 
   pypi_release:
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.11
     steps:
       - checkout
       - run:
@@ -42,27 +42,14 @@ workflows:
   build-and-release:
     jobs:
       - build-and-test:
-          name: py27
-          runtime: "2.7"
-          filters:
-            tags:
-              only: /[0-9]+(\.[0-9]+)*/
-      - build-and-test:
-          name: py37
-          filters:
-            tags:
-              only: /[0-9]+(\.[0-9]+)*/
-      - build-and-test:
-          name: py310
-          runtime: "3.10"
+          name: py311
+          runtime: "3.11"
           filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
       - pypi_release:
           requires:
-            - py27
-            - py37
-            - py310
+            - py311
           filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
@@ -76,13 +63,8 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
     jobs:
       - build-and-test:
-          name: py27
-          runtime: "2.7"
-      - build-and-test:
-          name: py37
-      - build-and-test:
-          name: py310
-          runtime: "3.10"
+          name: py311
+          runtime: "3.11"
