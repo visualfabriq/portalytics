@@ -25,22 +25,21 @@ with open('README.md') as f:
     long_description = f.read()
 
 install_requires = [
-    "joblib~=1.2.0",
-    "numpy==1.23.5",
-    "pandas~=1.1",
-    "numexpr>=2.7.1",
-    "scipy==1.11.1",
+    "joblib==1.4.2",
+    "numpy==1.26.4", # higher versions are not supported yet for py311
+    "pandas==2.2.2",
+    "scikit-learn==1.5",
+    "xgboost==2.0.3",
+    "scipy==1.13.1",
     "category-encoders==2.2.2",
+    "numexpr>=2.7.1",
     "seaborn>=0.10.1",
-    "scikit-learn==1.1.3",
-    "xgboost==0.82",
     "statsmodels>=0.12.0",
-    "fbprophet==0.5; python_version <= '2.7'",
-    "hyperopt==0.2.5",
-    "mock==2.0.0"
+    "hyperopt>=0.2.7",
 ]
 tests_requires = [
     'pytest',
+    'mock'
     'pytest-cov'
 ]
 
