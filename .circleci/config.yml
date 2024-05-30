@@ -7,6 +7,7 @@ jobs:
         description: Python runtime version
         type: string
         default: "3.11"
+        with-coverage: false
     docker:
       - image: cimg/python:<<parameters.runtime>>
     steps:
