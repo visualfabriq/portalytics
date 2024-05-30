@@ -18,13 +18,13 @@ PID_MAPPER_PATH = "{}/<set_path_on_init>".format(MODEL_DATA_PATH)
 # -------------- column names --------------
 # VF call columns
 ACCOUNT_ID_COL = "account_id"
-BASELINE_COL = "baseline_units_ext"
+BASELINE_COL = "baseline_units"
 ITEM_COL = "pid"
-START_DATE_COL = "in_store_start_date"
-END_DATE_COL = "in_store_end_date"
-DISCOUNT_COL = "promoted_price_ratio"
-DISPLAY_COL = "on_display"
-FEATURE_COL = "on_feature"
+START_DATE_COL = "field_23"
+END_DATE_COL = "field_24"
+DISCOUNT_COL = "field_21880"
+DISPLAY_COL = "field_21837"
+FEATURE_COL = "field_21836"
 PROMO_FEATURES = [DISCOUNT_COL, DISPLAY_COL, FEATURE_COL]
 
 # Columns in lookup tables
@@ -59,7 +59,7 @@ _ordered_column_list = [
 _ordered_column_list.extend(PROMO_FEATURES)
 metadata = {
     "features": dict(zip(_ordered_column_list, [[]] * len(_ordered_column_list))),
-    "target": {"total_ef_qty": []},
+    "target": {"total_units": []},
     "labels": {},
     "one_hot_encode": False,
     "ordered_column_list": _ordered_column_list,
