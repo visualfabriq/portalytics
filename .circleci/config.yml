@@ -8,7 +8,7 @@ jobs:
         type: string
         default: "3.11"
     docker:
-      - image: circleci/python:<<parameters.runtime>>
+      - image: cimg/python:<<parameters.runtime>>
     steps:
       - checkout
       - run:
