@@ -7,7 +7,6 @@ jobs:
         description: Python runtime version
         type: string
         default: "3.11"
-        with-coverage: false
     docker:
       - image: cimg/python:<<parameters.runtime>>
     steps:
@@ -39,21 +38,6 @@ jobs:
       - run:
           name: Run Tests
           command: pytest -vs tests/
-
-      - when:
-          condition: << parameters.with-coverage >>
-          steps:
-            - run:
-                name: Run tests with coverage reporting
-                command: |
-                  ~/venv/bin/python -m coverage run -m \
-                    pytest tests --junitxml=test-results/junit.xml
-                  ~/venv/bin/python -m coverage xml -o cobertura.xml
-            - store_test_results:
-                path: test-results
-            - store_artifacts:
-                path: test-results
-            - coverage-reporter/send_report
 
 
   pypi_release:
@@ -106,4 +90,3 @@ workflows:
       - build-and-test:
           name: py311
           runtime: "3.11"
-          with-coverage: true
