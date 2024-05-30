@@ -12,20 +12,56 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Activate virtualenv
+          command: virtualenv ~/venv
+
+      - restore_cache:
+          keys:
+            - << parameters.runtime >>-v1-dependencies-{{ checksum "setup.py" }}
+            - << parameters.runtime >>-v1-dependencies
+
+      - codeartifact/init:
+          tool: pip
+
+      - run:
           name: Install Requirements
           command: sudo pip install .[test]
       - run:
           name: Install Module
           command: sudo python setup.py build && sudo python setup.py install
+
+      - save_cache:
+          key: << parameters.runtime >>-v1-dependencies-{{ checksum "setup.py" }}
+          paths:
+            - ~/venv
+
       - run:
           name: Run Tests
           command: pytest -vs tests/
 
+      - when:
+          condition: << parameters.with-coverage >>
+          steps:
+            - run:
+                name: Run tests with coverage reporting
+                command: |
+                  ~/venv/bin/python -m coverage run -m \
+                    pytest tests --junitxml=test-results/junit.xml
+                  ~/venv/bin/python -m coverage xml -o cobertura.xml
+            - store_test_results:
+                path: test-results
+            - store_artifacts:
+                path: test-results
+            - coverage-reporter/send_report
+
+
   pypi_release:
     docker:
-      - image: circleci/python:3.11
+      - image: cimg/python:3.11
     steps:
       - checkout
+      - codeartifact/init:
+          tool: pip
       - run:
           name: Install Twine
           command: sudo pip install twine
@@ -35,6 +71,7 @@ jobs:
       - run:
           name: Upload to Pypi
           command: sudo twine upload --skip-existing --non-interactive -u __token__ -p $PYPI_API_TOKEN dist/*
+
 
 workflows:
   version: 2.1
@@ -68,3 +105,4 @@ workflows:
       - build-and-test:
           name: py311
           runtime: "3.11"
+          with-coverage: true
