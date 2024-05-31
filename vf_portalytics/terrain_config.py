@@ -45,7 +45,7 @@ _ordered_column_list = [
 _ordered_column_list.extend(PROMO_FEATURES)
 metadata = {
     "features": dict(zip(_ordered_column_list, [[]] * len(_ordered_column_list))),
-    "target": {"total_ef_qty": []},
+    "target": {"total_units": []},
     "labels": {},
     "one_hot_encode": False,
     "ordered_column_list": _ordered_column_list,
