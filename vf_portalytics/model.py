@@ -9,17 +9,6 @@ import joblib
 from vf_portalytics.tool import rm_file_or_dir
 
 
-def _label_safe_value(input_val):
-    return str(input_val).replace('.', '')
-
-
-def _label_check(input_val, labels):
-    if input_val != input_val:
-        return -1
-    else:
-        return labels.get(_label_safe_value(input_val), -1)
-
-
 class PredictionModel(object):
     def __init__(self, id, path=None, one_hot_encode=None):
 
@@ -42,6 +31,7 @@ class PredictionModel(object):
         self._load_model()
 
     def _load_metadata(self):
+        """Load metadata from disk"""
         if os.path.exists(self.meta_path):
             with open(self.meta_path, 'r') as meta_file:
                 model_data = json.load(meta_file)
@@ -55,6 +45,7 @@ class PredictionModel(object):
         self.ordered_column_list = model_data.get('ordered_column_list', [])
 
     def _save_metadata(self):
+        """Save metadata to disk"""
         model_data = {'features': self.features,
                       'target': self.target,
                       'labels': self.labels,
@@ -64,26 +55,32 @@ class PredictionModel(object):
             json.dump(model_data, meta_file)
 
     def _load_model(self):
+        """Load model from disk"""
         if os.path.exists(self.model_path):
             self.model = joblib.load(self.model_path)
         else:
             self.model = None
 
     def _save_model(self, compress_level=3):
+        """Save model to disk"""
         if self.model is not None:
             joblib.dump(self.model, self.model_path, compress=compress_level)
 
     def save(self, compress_level=3):
+        """Save model and metadata to disk"""
         self._save_metadata()
         self._save_model(compress_level=compress_level)
 
-    def create_train_df(self, df):
+    def create_train_df(self, df) -> pd.DataFrame:
+        """Create a training data frame from the input data frame"""
         return self.pre_processing(df, train_mode=True)
 
-    def create_test_df(self, df):
+    def create_test_df(self, df) -> pd.DataFrame:
+        """Create a test data frame from the input data frame"""
         return self.pre_processing(df, train_mode=False)
 
-    def predict(self, df):
+    def predict(self, df) -> pd.Series:
+        """Predict the target value"""
         if self.model is None:
             raise ValueError('No model is available for prediction')
 
@@ -94,7 +91,14 @@ class PredictionModel(object):
 
         return prediction_df
 
-    def pre_processing(self, df, train_mode=False, silent_mode=False):
+    def pre_processing(self, df, train_mode=False, silent_mode=False) -> pd.DataFrame:
+        """
+        Pre-process the input data frame
+        Input:
+            df: pd.DataFrame, the input data frame
+            train_mode: bool, whether the data frame is for training
+            silent_mode: bool, whether to suppress warnings
+        """
         # check the columns against the features and targets
         if not self.features:
             raise ValueError('No features defined')
@@ -178,21 +182,31 @@ class PredictionModel(object):
 
         # set the columns in order
         df = df[col_list]
-
         return df
 
-    def _post_processing(self, ser):
-        # todo: we currently do not support log/exp if we have multiple target columns
+    def _post_processing(self, ser) -> pd.Series:
+        """
+        Post-process the prediction series
+        Input:
+            ser: pd.Series, the prediction series
+        """
         for col, transforms in self.target.items():
             for transform in transforms:
                 ser = self._back_transformation(transform, ser)
         return ser
 
     @staticmethod
-    def _back_transformation(transform, input_ser):
+    def _back_transformation(transform, input_ser) -> pd.Series:
+        """
+        Apply back transformation to the input series
+        Input:
+            transform: str, the transformation to apply
+            input_ser: pd.Series, the input series
+        """
         if transform == 'log':
             return np.exp(input_ser)
 
     def delete(self):
+        """Delete the model and metadata files"""
         rm_file_or_dir(self.meta_path)
         rm_file_or_dir(self.model_path)
