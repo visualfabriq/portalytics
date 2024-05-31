@@ -4,7 +4,7 @@ import numpy as np
 # -------------- column names --------------
 # VF call columns
 ACCOUNT_ID_COL = "account_id"
-BASELINE_COL = "baseline_units_ext"
+BASELINE_COL = "baseline_units"
 ITEM_COL = "pid"
 START_DATE_COL = "field_23"
 END_DATE_COL = "field_24"
