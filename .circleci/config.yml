@@ -19,9 +19,11 @@ jobs:
           keys:
             - << parameters.runtime >>-v1-dependencies-{{ checksum "setup.py" }}
             - << parameters.runtime >>-v1-dependencies
+
       - run:
-          name: Install Requirements
-          command: sudo pip install .[test]
+          name: Install dependencies
+          command: ~/venv/bin/pip install .[test]
+
       - run:
           name: Install Module
           command: sudo python setup.py build && sudo python setup.py install
