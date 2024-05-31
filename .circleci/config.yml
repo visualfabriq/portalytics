@@ -19,10 +19,6 @@ jobs:
           keys:
             - << parameters.runtime >>-v1-dependencies-{{ checksum "setup.py" }}
             - << parameters.runtime >>-v1-dependencies
-
-      - codeartifact/init:
-          tool: pip
-
       - run:
           name: Install Requirements
           command: sudo pip install .[test]
@@ -45,8 +41,7 @@ jobs:
       - image: cimg/python:3.11
     steps:
       - checkout
-      - codeartifact/init:
-          tool: pip
+
       - run:
           name: Install Twine
           command: sudo pip install twine
