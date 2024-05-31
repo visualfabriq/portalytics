@@ -31,7 +31,7 @@ install_requires = [
     "scikit-learn==1.5",
     "xgboost==2.0.3",
     "scipy==1.13.1",
-    "category-encoders==2.2.2",
+    "category-encoders==2.6.3",
     "numexpr>=2.7.1",
     "seaborn>=0.10.1",
     "statsmodels>=0.12.0",
