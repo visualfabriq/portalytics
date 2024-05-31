@@ -24,10 +24,6 @@ jobs:
           name: Install dependencies
           command: ~/venv/bin/pip install .[test]
 
-      - run:
-          name: Install Module
-          command: sudo python setup.py build && sudo python setup.py install
-
       - save_cache:
           key: << parameters.runtime >>-v1-dependencies-{{ checksum "setup.py" }}
           paths:
@@ -46,13 +42,13 @@ jobs:
 
       - run:
           name: Install Twine
-          command: sudo pip install twine
+          command: pip install twine
       - run:
           name: Package Project
-          command: sudo python setup.py sdist bdist_wheel
+          command: python setup.py sdist bdist_wheel
       - run:
           name: Upload to Pypi
-          command: sudo twine upload --skip-existing --non-interactive -u __token__ -p $PYPI_API_TOKEN dist/*
+          command: twine upload --skip-existing --non-interactive -u __token__ -p $PYPI_API_TOKEN dist/*
 
 
 workflows:
