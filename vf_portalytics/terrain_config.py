@@ -6,11 +6,11 @@ import numpy as np
 ACCOUNT_ID_COL = "account_id"
 BASELINE_COL = "baseline_units_ext"
 ITEM_COL = "pid"
-START_DATE_COL = "in_store_start_date"
-END_DATE_COL = "in_store_end_date"
-DISCOUNT_COL = "promoted_price_ratio"
-DISPLAY_COL = "on_display"
-FEATURE_COL = "on_feature"
+START_DATE_COL = "field_23"
+END_DATE_COL = "field_24"
+DISCOUNT_COL = "field_21880"
+DISPLAY_COL = "field_21837"
+FEATURE_COL = "field_21836"
 PROMO_FEATURES = [DISCOUNT_COL, DISPLAY_COL, FEATURE_COL]
 
 # Columns in lookup tables

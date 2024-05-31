@@ -8,7 +8,7 @@ import vf_portalytics.terrain_config as config
 def _get_dataframe(file_format, obj, key_cols=None):
     """Check whether obj is dataframe or string and read in if necessary."""
     if isinstance(obj, str):
-        obj = getattr(pd, "read_{}".format(file_format))(obj)
+        obj = getattr(pd, f"read_{file_format}")(obj)
     elif not isinstance(obj, pd.DataFrame):
         raise ValueError("obj must be a path (string) or dataframe.")
 
