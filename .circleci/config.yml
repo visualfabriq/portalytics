@@ -31,7 +31,7 @@ jobs:
 
       - run:
           name: Run Tests
-          command: pytest -vs tests/
+          command: ~/venv/bin/python -m pytest tests
 
 
   pypi_release:
