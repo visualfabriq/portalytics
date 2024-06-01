@@ -39,3 +39,9 @@ It is a custom sklearn transformer that contains one transformer for each group 
 
 MultiTransformer can support every sklearn based transformer, the only thing that is need to be done is to extend 
 [`POTENTIAL_TRANSFORMER`](./vf_portalytics/ml_helpers.py) dictionary. Feel free to raise a PR. 
+
+
+
+## [Model](./vf_portalytics/model.py)
+Model is a wrapper for ML models to make the model more portable and easier to use inside Visualfabriq environment.
+Check the [example](./example_notebooks/example.ipynb) of how to use the model wrapper.
