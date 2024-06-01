@@ -158,7 +158,7 @@ class AccountClusterTransformer(BaseEstimator, TransformerMixin):
             try:
                 X['cluster'] = X[self.cat_feature_list[0]]
             except KeyError:
-                raise KeyError('Feature "{}" not in dataframe'.format(self.cat_feature_list[0]))
+                raise KeyError(f'Feature "{self.cat_feature_list[0]}" not in dataframe')
         else:
             # Multiple categories (accounts)
             cluster_map = dict()
@@ -201,5 +201,5 @@ class CustomClusterTransformer(BaseEstimator, TransformerMixin):
             try:
                 X['cluster'] = X[self.cat_feature]
             except KeyError:
-                raise KeyError('Feature "{}" not in dataframe'.format(self.cat_feature))
+                raise KeyError(f'Feature "{self.cat_feature}" not in dataframe')
         return X
