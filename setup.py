@@ -39,7 +39,8 @@ install_requires = [
 ]
 tests_requires = [
     'pytest',
-    'pytest-cov'
+    'pytest-cov',
+    'pyarrow'
 ]
 
 extras_requires = []
