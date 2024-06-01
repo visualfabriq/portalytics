@@ -103,51 +103,40 @@ class PredictionModel(object):
         if not self.features:
             raise ValueError('No features defined')
 
-        col_list = sorted(list(self.features.keys()))
         if train_mode:
             missing_columns = [x for x in self.features.keys() if x not in df]
             if missing_columns:
                 raise KeyError('Missing features columns ' + ', '.join(missing_columns))
 
-        df = df[[x for x in col_list if x in df]].copy()
+        df = df[[x for x in self.features.keys() if x in df]].copy()
 
         # handle categorical features
         categorical_features = [col for col, transformations in self.features.items() if 'C' in transformations]
-
         if categorical_features:
-            if train_mode:
-                # reset labels
-                self.labels = {}
-
-            output = [df]
-
-            for col in categorical_features:
-                if train_mode:
-                    # refresh label encoding for this column
-                    self.labels[col] = list(df[col].value_counts().index)  # sorted label based on counts
-                    if not silent_mode and len(self.labels[col]) <= 2:
-                        print('Column ' + col + ' has less then expected unique values for a categorical ' +
-                              'feature (' + ', '.join([str(x) for x in self.labels[col]]) + ')')
-                elif col not in df:
-                    # skip it if we're not training and it's missing
-                    if not silent_mode:
-                        print('Missing categorical feature: ' + col)
-                    continue
-
-                # apply label encoding
-                lookup = {x: i for i, x in enumerate(self.labels[col])}
-                missing = len(lookup)
-                df[col] = df[col].apply(lambda x: lookup.get(x, missing))
-
-                if self.one_hot_encode:
-                    # apply one hot encoding
-                    output.append(pd.get_dummies(df[col], prefix=col))
-                    del df[col]
+            output = self._prerprocess_categoricals(categorical_features, df, silent_mode, train_mode)
 
             if self.one_hot_encode:
                 df = pd.concat(output, axis=1)
 
-        # transform columns
+        self._transform_columns(df)
+        col_list = self._order_columns(df, train_mode)
+        self._fill_columns(categorical_features, col_list, df)
+
+        # set the columns in order
+        df = df[col_list]
+        return df
+
+    def _order_columns(self, df, train_mode):
+        """Order the columns of the data frame"""
+        if train_mode:
+            col_list = sorted([x for x in df.columns if x not in self.target])
+            self.ordered_column_list = col_list
+        else:
+            col_list = self.ordered_column_list
+        return col_list
+
+    def _transform_columns(self, df):
+        """Apply transformations to the columns of the data frame"""
         for column, transforms in self.features.items():
             if not transforms:
                 continue
@@ -157,17 +146,8 @@ class PredictionModel(object):
                 elif transform != 'C':
                     raise KeyError('Unknown transform option: ' + transform)
 
-        # save the columns and order of columns
-        if train_mode:
-            col_list = sorted([x for x in df.columns if x not in self.target])
-            self.ordered_column_list = col_list
-        else:
-            col_list = self.ordered_column_list
-
-        if train_mode and not col_list:
-                raise ValueError('Model does not contains enough proper features')
-
-        # check the availability of all columns
+    def _fill_columns(self, categorical_features, col_list, df):
+        """Fill the columns of the data frame"""
         for col in col_list:
             if col not in df:
                 if self.one_hot_encode and \
@@ -180,9 +160,35 @@ class PredictionModel(object):
                 else:
                     df[col] = 0.0
 
-        # set the columns in order
-        df = df[col_list]
-        return df
+    def _prerprocess_categoricals(self, categorical_features, df, silent_mode, train_mode):
+        """Pre-process the categorical features of the data frame"""
+        if train_mode:
+            # reset labels
+            self.labels = {}
+        output = [df]
+        for col in categorical_features:
+            if train_mode:
+                # refresh label encoding for this column
+                self.labels[col] = list(df[col].value_counts().index)  # sorted label based on counts
+                if not silent_mode and len(self.labels[col]) <= 2:
+                    print('Column ' + col + ' has less then expected unique values for a categorical ' +
+                          'feature (' + ', '.join([str(x) for x in self.labels[col]]) + ')')
+            elif col not in df:
+                # skip it if we're not training and it's missing
+                if not silent_mode:
+                    print('Missing categorical feature: ' + col)
+                continue
+
+            # apply label encoding
+            lookup = {x: i for i, x in enumerate(self.labels[col])}
+            missing = len(lookup)
+            df[col] = df[col].apply(lambda x: lookup.get(x, missing))
+
+            if self.one_hot_encode:
+                # apply one hot encoding
+                output.append(pd.get_dummies(df[col], prefix=col))
+                del df[col]
+        return output
 
     def _post_processing(self, ser) -> pd.Series:
         """
