@@ -26,7 +26,7 @@ with open('README.md') as f:
 
 install_requires = [
     "joblib==1.4.2",
-    "numpy==1.26.4", # higher versions are not supported yet for py311
+    "numpy==1.26.4",  # higher versions are not supported yet for py311
     "pandas==2.2.2",
     "scikit-learn==1.5",
     "xgboost==2.0.3",

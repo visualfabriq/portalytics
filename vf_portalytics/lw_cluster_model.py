@@ -122,7 +122,7 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
                 for clustering_columns, multiplication_dict in self.multiplication_dicts.items():
                     for multiplication_key, values in x_in.groupby(list(clustering_columns)):
                         # During training, we divide by the multiplication_dict values
-                        y_in.loc[values.index] /= multiplication_dict[multiplication_key]
+                        y_in.loc[values.index] /= multiplication_dict[multiplication_key[0]]
 
                 if not isinstance(cluster_model, LinearRegression):
                     raise AssertionError(
