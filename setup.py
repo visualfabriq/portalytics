@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 
+import pathlib
+
 from sys import version_info as v
 
+import pkg_resources
 import setuptools
 
 # Check this Python version is supported
@@ -24,19 +27,13 @@ classifiers = [
 with open('README.md') as f:
     long_description = f.read()
 
-install_requires = [
-    "joblib==1.4.2",
-    "numpy==1.26.4",  # higher versions are not supported yet for py311
-    "pandas==2.2.2",
-    "scikit-learn==1.5",
-    "xgboost==2.0.3",
-    "scipy==1.13.1",
-    "category-encoders==2.6.3",
-    "numexpr>=2.7.1",
-    "seaborn>=0.10.1",
-    "statsmodels>=0.12.0",
-    "hyperopt>=0.2.7",
-]
+with pathlib.Path('requirements.txt').open() as requirements_txt:
+    install_requires = [
+        str(requirement)
+        for requirement
+        in pkg_resources.parse_requirements(requirements_txt)
+    ]
+
 tests_requires = [
     'pytest',
     'pytest-cov',
