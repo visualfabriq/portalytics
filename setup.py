@@ -47,6 +47,8 @@ extras_requires = []
 
 setuptools.setup(
     name='vf_portalytics',
+    setup_requires=['pbr', 'pytest-runner'],
+    pbr=True,
     description='A consistent interface for creating Machine Learning Models compatible with VisualFabriq environment',
     long_description=long_description,
     author='Christos Tselas',
