@@ -62,7 +62,7 @@ workflows:
           requires:
             - py27
             - py37
-            - py310
+            - py311
           filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
