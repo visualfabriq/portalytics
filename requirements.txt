@@ -1,4 +1,4 @@
-joblib~=1.1;python_version=="2.7"
+joblib~=1.1;python_version>="3.7"
 joblib==0.13.2;python_version=="2.7"
 numpy==1.26.4
 pandas<2
