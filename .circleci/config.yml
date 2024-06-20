@@ -53,8 +53,8 @@ workflows:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
       - build-and-test:
-          name: py310
-          runtime: "3.10"
+          name: py311
+          runtime: "3.11"
           filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
@@ -84,5 +84,5 @@ workflows:
       - build-and-test:
           name: py37
       - build-and-test:
-          name: py310
-          runtime: "3.10"
+          name: py311
+          runtime: "3.11"
