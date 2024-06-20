@@ -20,13 +20,16 @@ class FeatureSubsetTransform(BaseEstimator, TransformerMixin):
         self.transformer = self.transformer.fit(X=x_in[self.input_columns])
         return self
 
-    def transform(self, X):
+    def transform(self, X) -> pd.DataFrame:
+        """
+        Transform the data by applying the transformer to the columns that are being used to group the data
+        """
         x_in = X.drop([n for n in self.group_cols], axis=1)
         # transform the promoted_price collumn
         transformed_price = self.transformer.transform(X=x_in[self.input_columns])
         # convert data into initial format
         transformed_price = pd.DataFrame(data=transformed_price, index=x_in.index,
-                                         columns=self.transformer.get_feature_names(self.input_columns))
+                                         columns=self.transformer.get_feature_names_out(self.input_columns))
         transformed_price.drop(self.input_columns + ['1'], axis=1, inplace=True)
         transformed_x = pd.concat([x_in, transformed_price], axis=1)
         transformed_x[list(self.group_cols)] = X[list(self.group_cols)]
@@ -71,7 +74,7 @@ class FeatureSubsetModel(BaseEstimator, RegressorMixin):
             self.sub_models[gp_key] = gp_model
         return self
 
-    def predict(self, X, y=None):
+    def predict(self, X, y=None) -> pd.Series:
         """
         Same as 'self.fit()', but call the 'predict()' method for each submodel and return the results.
         :return: predicted_market_share*predicted_market_volume*consumer_length/product_volume_per_sku

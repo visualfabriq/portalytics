@@ -52,7 +52,7 @@ class MultiModel(BaseEstimator, RegressorMixin):
         self.nominals = nominals
         self.ordinals = ordinals
 
-        self.sub_models = self.initiliaze_models()
+        self.sub_models = self._initiliaze_models()
         self.multi_transformer = None
 
     def fit(self, X, y=None):
@@ -87,7 +87,16 @@ class MultiModel(BaseEstimator, RegressorMixin):
             print('Model for %s trained' % str(gp_key))
         return self
 
-    def predict(self, X, y=None):
+    def predict(self, X, y=None) -> pd.DataFrame:
+        """
+        Predict the target variable for each row in X.
+        Input:
+            X: pd.DataFrame, the input data frame
+            y: pd.Series, the target variable
+
+        Output:
+            pd.DataFrame, the predicted target variable
+        """
 
         # single model
         if self.group_col not in X.columns:
@@ -123,7 +132,8 @@ class MultiModel(BaseEstimator, RegressorMixin):
         results = pd.DataFrame(index=transformed_x.index, data=results, dtype=np.float64)
         return results
 
-    def initiliaze_models(self):
+    def _initiliaze_models(self) -> dict:
+        """Initialize the models for each group."""
         sub_models = {}
         for gp_key in self.clusters:
             sub_models[gp_key] = get_model(self.params[gp_key])
@@ -176,7 +186,7 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
         self.transformers_nominals = None
         self.transformers_ordinals = None
         self.transformers_non_categorical = None
-        self.transformers_nominals, self.transformers_ordinals, self.transformers_non_categorical = self.initiliaze_transformers()
+        self.transformers_nominals, self.transformers_ordinals, self.transformers_non_categorical = self._initiliaze_transformers()
 
     def fit(self, X, y=None):
         """
@@ -220,7 +230,14 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
             print('Transformer for %s fitted' % str(gp_key))
         return self
 
-    def transform(self, X):
+    def transform(self, X) -> pd.DataFrame:
+        """
+        Transform the data by applying the transformer to the columns that are being used to group the data.
+        Input:
+            X: pd.DataFrame, the input data frame
+        Output:
+            pd.DataFrame, the transformed data
+        """
 
         groups = X.groupby(by=self.group_col)
         transformed_x = []
@@ -247,7 +264,12 @@ class MultiTransformer(BaseEstimator, TransformerMixin):
 
         return pd.concat(transformed_x)
 
-    def initiliaze_transformers(self):
+    def _initiliaze_transformers(self) -> tuple:
+        """
+        Initialize the transformers for each group.
+        Returns:
+            tuple of dictionaries
+        """
         transformers_nominals = {}
         transformers_ordinals = {}
         transformers_non_categorical = {}
