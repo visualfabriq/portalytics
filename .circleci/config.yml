@@ -8,7 +8,7 @@ jobs:
         type: string
         default: "3.7"
     docker:
-      - image: circleci/python:<<parameters.runtime>>
+      - image: cimg/python:<<parameters.runtime>>
     steps:
       - checkout
       - run:
@@ -23,7 +23,7 @@ jobs:
 
   pypi_release:
     docker:
-      - image: circleci/python:3.7
+      - image: cimg/python:3.7
     steps:
       - checkout
       - run:
