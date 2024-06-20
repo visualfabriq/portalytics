@@ -1,0 +1,372 @@
+CHANGES
+=======
+
+* Prediction should be the same but there is randomization that takes place somewhere (ignore for now)
+* remove unused import
+* fix pandas import
+* fix(deps): Update xgboost to 1.5.2 for python > 3.3
+
+1.0.8
+-----
+
+* Fix requirements extra =
+
+1.0.7
+-----
+
+* Fix ipython for python 2
+* Fix joblib for python 2
+* Fix joblib for python 2
+* Pin numpy because  numpy.int was deprecated and is needed for category-encoder
+* Update ipython properly
+* Update ipython properly
+* Update packages to fix Dependabot
+
+1.0.6
+-----
+
+* Update numpy and scipy
+
+1.0.5
+-----
+
+* Fix classifiers
+
+1.0.4
+-----
+
+* Add pytest
+* Make things as they were before!
+* Add again pbr
+* Remove pbr
+* Add build cfg
+* Add build pbr
+
+1.0.3
+-----
+
+* Add build back
+
+1.0.2
+-----
+
+* Remove GPLv3
+* Upgrade circleci for py310
+* Remove old dependencies
+* Test commit
+* Add runtime for py310
+* Use different docker image
+* Empty commit
+* Add python 310 as build and test dependency
+
+1.0.1
+-----
+
+* Pin scikit-learn for python 3
+
+0.9.9
+-----
+
+* Avoid sentry error when new group tries to be predicted
+
+0.9.8
+-----
+
+* Remove test for now, its urgent
+* Fix pytest (locally doesnt fail :/)
+* Fix pytest
+* Test with fewer estimators to improve pytest speed
+
+0.9.7
+-----
+
+* Set numexpr for python 2.7 to 2.7.3
+* Update README.md
+
+0.9.6
+-----
+
+* Test with fewer estimators to improve pytest speed
+* Fix feature order issue
+
+0.9.5
+-----
+
+* Add baseline in Cluster Model
+
+0.9.4
+-----
+
+* Fix python3 compatibility issue
+* Fix fit initialization issue of XGBRegressorChain
+* Fix initialization issue with XGBRegressorChain
+* Fix python3 compatibility issue
+
+0.9.3
+-----
+
+* Skip test that fails unexpectable in circle ci
+* Add Chain Regressor
+* Move make\_data to helpers
+
+0.9.2
+-----
+
+* Normalize also categoricals after transformation
+* Fix index issue
+
+0.9.1
+-----
+
+* Split tests of MultiModel and MultiTransformer
+* Append groups to a list instead of directly to a df (its faster)
+* Add ability to scale non categorical features
+* Fix transformer
+* Add ReadMe for MultiModel and MultiTransformer
+
+0.9.0
+-----
+
+
+0.8.9
+-----
+
+* Updated readme
+* Xgboost version update py3
+
+0.8.8
+-----
+
+* Updated xgboost requirements for python 3
+
+0.8.7
+-----
+
+* Updated other python 3 requirements
+
+0.8.6
+-----
+
+* Updated scikit-learn requirements for python 3
+
+0.8.5
+-----
+
+* Added CustomClusterTransformer and test
+
+0.8.4
+-----
+
+* Updated transform and docstring
+* Updated formatting
+* Updated formatting
+* Updated AccountClusterTransformer and test
+* Added AccountClusterTransformer
+
+0.8.3
+-----
+
+* codacy fix
+* codacy fix
+* adjust lw cluster model and add tests
+* add a light cluster model
+* Update requirements for python 2 and 3
+* create multi transformer test adjust multiModel, multiTransormer
+* split multimodel to model and transformer
+
+0.8.2
+-----
+
+* minor change in cluster model
+
+0.8.1
+-----
+
+* fix cluster model
+* keep the same scikit-learn version in both python
+
+0.7.9
+-----
+
+* Updated docstring for ClusterSubModel
+* Added ClusterSubModel
+
+0.7.8
+-----
+
+* fix python 3 compatability
+* fix python 3 compatability
+* use logging instead of print
+* predict a df instead of a series in multimodel adjust tests
+* create a test for multi output
+* give the ability to the multi\_model to use different models than XGBoost different model for each group fix tests
+* add a dictionary of models
+* add phasing transformer
+
+0.7.7
+-----
+
+* Cluster model update
+
+0.7.6
+-----
+
+* Fix cluster model test
+* Adjust cluster model test
+* Adjust cluster model test
+* minor change to check circleci
+* Adjusted ClusterModel class and test
+
+0.7.5
+-----
+
+* fix tests
+* Cleaned up code
+* Moved ClusterModel test, cleaned up code
+* Added ClusterModel and test code
+
+0.7.4
+-----
+
+* Update requirements for python 2 and 3
+
+0.7.3
+-----
+
+* Update requirements for python 2 and 3
+
+0.7.2
+-----
+
+* Update requirements for python 2
+* Add more general parameters for FeatureSubsetModel-Transformer Fix notebook example Fix tests
+
+0.7.1
+-----
+
+* fix print issue when categories are not strings
+* fix typo
+* give the ability to multi\_model to predict when trained to one categorical feature (constant) that do not exist in future data test that when we dont have the constant categorical feature in the future the model still uses the one existing model and predicts
+* # convert notebook example
+
+0.6.9
+-----
+
+* change dtype of prediction to float64
+
+0.6.8
+-----
+
+* add different weights in the objectives function for "under\_predict\_weight"
+
+0.6.7
+-----
+
+* add package version retrieval
+* python2 compatible
+* add requirements
+* pep changes
+* pep changes
+* pep changes
+* pep changes
+* Able to have different categorical encoders for, nominal and for ordinal categorical features
+* Able to have different categorical encoders for, nominal and for ordinal categorical features
+* add tests
+* add comments of dipanjan in the code
+* add comments of dipanjan in the code
+* complete experiment with 2 transformers and saving the model
+* add a new transformatiom
+* make changes of how to import modules
+* make changes of how to import modules
+* add grouped models, transformers and a jupyter example
+
+0.6.6
+-----
+
+* fix predict for unseend data that do not belong to a category
+* change tests to be compatible with the new modules
+* exchanging the previous feature\_subset classes with the ones made in the branch
+* add minor changes to make the notebook problem specific
+* add minor changes to make the notebook problem specific
+* add minor changes to make the notebook problem specific
+* complete feature\_subset\_example2
+* complete feature\_subset\_example2
+* change subset model and create a new example
+* add tests for prediction model preprocessing and for feature\_subset
+
+0.6.5
+-----
+
+* Fix twine command
+
+0.6.4
+-----
+
+* Fix tag build
+
+0.6.3
+-----
+
+* Add PBR supported setup scheme and circleci based release
+* Add tests for prediction model
+* Add pytest dependency specific to python version
+* Add test deps
+* Install module
+* Fix typo
+* Add circleci config
+* path changes to make the notebook reproducible
+* path changes to make the notebook reproducible
+* Update notebook with references to classes and rename MyTransformer
+* add the jupyter notebook
+* Adds a class transformer that takes data, excludes features that are used for grouping and perform every sklearn transformer. Adds a jupyter notebook that tests the transformer by itself and with a combination of the FeatureSubsetModel using pipeline and Cross Validation
+* Added example of feature subset model
+* Fix formatting
+* Add version and release notes
+* Add custom objective function
+* Pin exact versions for Python 2.7
+* Version gate numpy, scipy, pandas, matplotlib, ipython, scikit-learn, xgboost.Remove unused packages: jupyterlab, lightgbm and bottleneck
+* Upgrade to Python 3
+* Handle low-dimensional models
+* library updates
+* only keep features
+* resolve post processing bug
+* explicit train\_mode
+* explicit train\_mode
+* train test sets
+* Silent Mode
+* Silent Mode
+* Version 0.5.0 including one hot encoding
+* Version 0.5.0 including one hot encoding
+* Version 0.5.0 including one hot encoding
+* Library versions
+* Library versions
+* Codacy
+* GBM Requirements
+* Python 3 fixes
+* Fixing python 3 compatibility using 2to3 fixer unicode
+* Fixing python 3 compatibility using 2to3 fixer dict
+* Move to Jupyter Lab & Seaborne + viz scripts
+* Move to Jupyter Lab & Seaborne + viz scripts
+* Improved garbage collection avoidance
+* Updated mask reversal with tilde call
+* Updated requirements
+* Updated requirements
+* Updated requirements
+* Updated requirements
+* Updated requirements
+* Updated requirements
+* Version 0.3.0 -> Cleaned up code
+* Version 0.2.0
+* Extended standard procedures
+* improved output
+* typo
+* Fixed Manifest for real (I hope)
+* Fixed Manifest
+* Fixed Manifest
+* Typo and visualizations
+* visualizations
+* data checks
+* setup functions
+* msgpack
+* basic setup
+* Initial commit
