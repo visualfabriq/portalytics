@@ -139,8 +139,8 @@ class ClusterModel(BaseEstimator, RegressorMixin):
 
                     fitted_indices.append(pd.Series(cluster.index))
                 except Exception as e:
-                    print("Unable to train model for clustering key {}. Check if your data ".format(clustering_key) +
-                          "contains zeroes in the multiplication columns for example:", e)
+                    print(f"Unable to train model for clustering key {clustering_key}. Check if your data "
+                          f"contains zeroes in the multiplication columns for example:", e)
                     logging.exception("Exception")
 
         return self

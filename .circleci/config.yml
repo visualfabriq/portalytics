@@ -6,35 +6,50 @@ jobs:
       runtime:
         description: Python runtime version
         type: string
-        default: "3.7"
+        default: "3.11"
     docker:
-      - image: circleci/python:<<parameters.runtime>>
+      - image: cimg/python:<<parameters.runtime>>
     steps:
       - checkout
       - run:
-          name: Install Requirements
-          command: sudo pip install -r requirements.txt
+          name: Activate virtualenv
+          command: virtualenv ~/venv
+
+      - restore_cache:
+          keys:
+            - << parameters.runtime >>-v1-dependencies-{{ checksum "setup.py" }}
+            - << parameters.runtime >>-v1-dependencies
+
       - run:
-          name: Install Module
-          command: sudo python setup.py build && sudo python setup.py install
+          name: Install dependencies
+          command: ~/venv/bin/pip install .[test]
+
+      - save_cache:
+          key: << parameters.runtime >>-v1-dependencies-{{ checksum "setup.py" }}
+          paths:
+            - ~/venv
+
       - run:
           name: Run Tests
-          command: pytest -vs tests/
+          command: ~/venv/bin/python -m pytest tests
+
 
   pypi_release:
     docker:
-      - image: circleci/python:3.7
+      - image: cimg/python:3.11
     steps:
       - checkout
+
       - run:
           name: Install Twine
-          command: sudo pip install twine
+          command: pip install twine
       - run:
           name: Package Project
-          command: sudo python setup.py sdist bdist_wheel
+          command: python setup.py sdist bdist_wheel
       - run:
           name: Upload to Pypi
-          command: sudo twine upload --skip-existing --non-interactive -u __token__ -p $PYPI_API_TOKEN dist/*
+          command: twine upload --skip-existing --non-interactive -u __token__ -p $PYPI_API_TOKEN dist/*
+
 
 workflows:
   version: 2.1
@@ -42,27 +57,14 @@ workflows:
   build-and-release:
     jobs:
       - build-and-test:
-          name: py27
-          runtime: "2.7"
-          filters:
-            tags:
-              only: /[0-9]+(\.[0-9]+)*/
-      - build-and-test:
-          name: py37
-          filters:
-            tags:
-              only: /[0-9]+(\.[0-9]+)*/
-      - build-and-test:
-          name: py310
-          runtime: "3.10"
+          name: py311
+          runtime: "3.11"
           filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
       - pypi_release:
           requires:
-            - py27
-            - py37
-            - py310
+            - py311
           filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
@@ -79,10 +81,5 @@ workflows:
                 - master
     jobs:
       - build-and-test:
-          name: py27
-          runtime: "2.7"
-      - build-and-test:
-          name: py37
-      - build-and-test:
-          name: py310
-          runtime: "3.10"
+          name: py311
+          runtime: "3.11"
