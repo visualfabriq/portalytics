@@ -26,13 +26,22 @@ POTENTIAL_MODELS = {
 }
 
 
-def _initialize_model(fc_model, params):
+def _initialize_model(fc_model, params) -> object:
+    """Initialize a model with the given parameters"""
     initialized_params = {key: value for key, value in params.items() if key in fc_model().get_params()}
     model = fc_model(**initialized_params)
     return model
 
 
 def get_model(params):
+    """
+    Get a model from POTENTIAL_MODELS
+    Input:
+        params: dictionary with model_name and model parameters
+
+    Output:
+        model: model object
+    """
     params = params if params else {}
     try:
         model_name = params.get('model_name')
@@ -61,6 +70,7 @@ def get_model(params):
 
 
 def get_transformer(name):
+    """Get a transformer from POTENTIAL_TRANSFORMER"""
     try:
         output = POTENTIAL_TRANSFORMER[name]
         return output()
@@ -98,7 +108,14 @@ class CustomTransformer(BaseEstimator, TransformerMixin):
         self.transformer.fit(X, y)
         return self
 
-    def transform(self, X):
+    def transform(self, X) -> pd.DataFrame:
+        """
+        Transform the input data
+        Input:
+            X: pd.DataFrame, the input data
+        Output:
+            transformed_x: pd.DataFrame, the transformed data
+        """
 
         if self.transformer is None:
             logger.warning(
@@ -158,7 +175,7 @@ class AccountClusterTransformer(BaseEstimator, TransformerMixin):
             try:
                 X['cluster'] = X[self.cat_feature_list[0]]
             except KeyError:
-                raise KeyError('Feature "{}" not in dataframe'.format(self.cat_feature_list[0]))
+                raise KeyError(f'Feature "{self.cat_feature_list[0]}" not in dataframe')
         else:
             # Multiple categories (accounts)
             cluster_map = dict()
@@ -201,5 +218,5 @@ class CustomClusterTransformer(BaseEstimator, TransformerMixin):
             try:
                 X['cluster'] = X[self.cat_feature]
             except KeyError:
-                raise KeyError('Feature "{}" not in dataframe'.format(self.cat_feature))
+                raise KeyError(f'Feature "{self.cat_feature}" not in dataframe')
         return X

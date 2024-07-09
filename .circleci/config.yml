@@ -33,6 +33,7 @@ jobs:
           name: Run Tests
           command: ~/venv/bin/python -m pytest tests
 
+
   pypi_release:
     docker:
       - image: cimg/python:3.11
@@ -49,22 +50,12 @@ jobs:
           name: Upload to Pypi
           command: twine upload --skip-existing --non-interactive -u __token__ -p $PYPI_API_TOKEN dist/*
 
+
 workflows:
   version: 2.1
 
   build-and-release:
     jobs:
-      - build-and-test:
-          name: py27
-          runtime: "2.7"
-          filters:
-            tags:
-              only: /[0-9]+(\.[0-9]+)*/
-      - build-and-test:
-          name: py37
-          filters:
-            tags:
-              only: /[0-9]+(\.[0-9]+)*/
       - build-and-test:
           name: py311
           runtime: "3.11"
@@ -73,8 +64,6 @@ workflows:
               only: /[0-9]+(\.[0-9]+)*/
       - pypi_release:
           requires:
-            - py27
-            - py37
             - py311
           filters:
             tags:
@@ -91,11 +80,6 @@ workflows:
               only:
                 - master
     jobs:
-      - build-and-test:
-          name: py27
-          runtime: "2.7"
-      - build-and-test:
-          name: py37
       - build-and-test:
           name: py311
           runtime: "3.11"

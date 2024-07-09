@@ -122,13 +122,13 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
                 for clustering_columns, multiplication_dict in self.multiplication_dicts.items():
                     for multiplication_key, values in x_in.groupby(list(clustering_columns)):
                         # During training, we divide by the multiplication_dict values
-                        y_in.loc[values.index] /= multiplication_dict[multiplication_key]
+                        y_in.loc[values.index] /= multiplication_dict[multiplication_key[0]]
 
                 if not isinstance(cluster_model, LinearRegression):
                     raise AssertionError(
-                        "Unsupported model type for LightWeightClusterModel: {} for ".format(type(cluster_model)) +
-                        "clustering key {}. Use ClusterModel instead, or switch the sub-model ".format(clustering_key) +
-                        "to a LinearRegression model.")
+                        f"Unsupported model type for LightWeightClusterModel: {type(cluster_model)} "
+                        f"for clustering key {clustering_key}. "
+                        f"Use ClusterModel instead, or switch the sub-model to a LinearRegression model.")
 
                 # Fit the sub-model with subset of rows
                 try:
@@ -139,8 +139,8 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
 
                     fitted_indices.append(pd.Series(x_in.index))
                 except Exception as e:
-                    print("Unable to train model for clustering key {}. Check if your data ".format(clustering_key) +
-                          "contains zeroes in the multiplication columns for example:", e)
+                    print(f"Unable to train model for clustering key {clustering_key}. "
+                          f"Check if your data contains zeroes in the multiplication columns for example:", e)
 
         return self
 
@@ -169,7 +169,7 @@ class LightWeightClusterModel(BaseEstimator, RegressorMixin):
                 elif "price_elasticity_coef" in sub_model:
                     predictions = self.predict_price_elasticity_model(sub_model, x_in)
                 else:
-                    raise AssertionError("Unsupported model: {}".format(sub_model))
+                    raise AssertionError(f"Unsupported model: {sub_model}")
 
                 scored_record_indices |= set(x_in.index)
                 results.append(pd.DataFrame(predictions, index=x_in.index).clip(lower=0))
