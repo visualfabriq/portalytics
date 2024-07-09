@@ -1,10 +1,9 @@
-joblib~=1.1;python_version>="3.7"
-joblib==0.13.2;python_version=="2.7"
-numpy==1.26.4
-pandas<2
-scikit-learn==1.5
-xgboost==2.0.3
-scipy==1.13.1
+joblib==1.4.2
+numpy>=2
+pandas~=2.2.2
+scikit-learn==1.5.1
+xgboost==2.1.0
+scipy==1.14.0
 category-encoders==2.6.3
 numexpr>=2.7.1
 seaborn>=0.10.1
