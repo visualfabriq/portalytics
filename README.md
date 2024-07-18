@@ -44,4 +44,41 @@ MultiTransformer can support every sklearn based transformer, the only thing tha
 
 ## [Model](./vf_portalytics/model.py)
 Model is a wrapper for ML models to make the model more portable and easier to use inside Visualfabriq environment.
-Check the [example](./example_notebooks/example.ipynb) of how to use the model wrapper.
+```
+import numpy as np
+import pandas as pd
+from sklearn.dummy import DummyRegressor
+
+from vf_portalytics.model import PredictionModel
+
+model_name = 'test_model'
+prediction_model = PredictionModel(model_name, '.')
+
+train_df = pd.DataFrame({
+    'baseline_units': [800, 700],
+    'promotion_technical_id': ['promotion_id_1', 'promotion_id_1'],
+    'promotion_type': [1, 2],
+    'promotion_ext_id': [1, 1],
+    'account_id': ['pa_1', 'pa_1'],
+    'pid': ['pid_1', 'pid_2']
+})
+dummy_regression = DummyRegressor(strategy="mean")
+dummy_regression.fit(train_df, np.array([1800, 1700]))
+
+prediction_model.features = {
+    'baseline_units': [],
+    'total_baseline_units': [],
+    'total_nr_products': [],
+    'base_price': [],
+    'discount_perc': [],
+    'discount_amt': [],
+    'account_id': [],
+}
+prediction_model.model = dummy_regression
+
+prediction_model.save()
+```
+The save function will generate 2 files: test_model.pkl and test_model.meta in the current directory. 
+These are the files needed to load the model and make predictions inside Visualfabriq environment.
+
+For more details check the [example](./example_notebooks/example.ipynb) of how to use the model wrapper.
