@@ -121,3 +121,18 @@ def test_get_factor(tmpdir):
     assert factor != 0
 
 
+def test_model_input_tables(tmpdir):
+    model_data_path = str(tmpdir.mkdir('model_data'))
+    coefs_path, account_id_mapper_path, pid_mapper_path = generate_model_paths(model_data_path)
+
+    terrain_model = Terrain(coef_table=coefs_path, file_format='parquet', account_id_mapper=account_id_mapper_path,
+                            pid_mapper=pid_mapper_path)
+
+    assert isinstance(terrain_model.coef_table, pd.DataFrame)
+    assert isinstance(terrain_model.account_id_mapper, pd.DataFrame)
+    assert isinstance(terrain_model.pid_mapper, pd.DataFrame)
+
+    assert not terrain_model.coef_table.empty
+    assert not terrain_model.account_id_mapper.empty
+    assert not terrain_model.pid_mapper.empty
+
