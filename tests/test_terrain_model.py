@@ -77,8 +77,8 @@ def test_terrain_model_predict(tmpdir):
     model_data_path = str(tmpdir.mkdir('model_data'))
     coefs_path, account_id_mapper_path, pid_mapper_path = generate_model_paths(model_data_path)
 
-    terrain_model = Terrain(coefs_path=coefs_path, file_format='parquet', account_id_mapper_path=account_id_mapper_path,
-                            pid_mapper_path=pid_mapper_path)
+    terrain_model = Terrain(coef_table=coefs_path, file_format='parquet', account_id_mapper=account_id_mapper_path,
+                            pid_mapper=pid_mapper_path)
     df = generate_predict_df()
     pred = terrain_model.predict(df)
     assert not (pred == df[config.BASELINE_COL]).all()
@@ -93,8 +93,8 @@ def test_terrain_with_prediction_model(tmpdir):
     model_data_path = str(tmpdir.mkdir('model_data'))
     coefs_path, account_id_mapper_path, pid_mapper_path = generate_model_paths(model_data_path)
 
-    terrain_model = Terrain(coefs_path=coefs_path, file_format='parquet', account_id_mapper_path=account_id_mapper_path,
-                            pid_mapper_path=pid_mapper_path)
+    terrain_model = Terrain(coef_table=coefs_path, file_format='parquet', account_id_mapper=account_id_mapper_path,
+                            pid_mapper=pid_mapper_path)
     model_id = 'terrain_test'
     joblib.dump(terrain_model, '{0}/{1}.pkl'.format(model_data_path, model_id), compress=3)
     with open('{0}/{1}.meta'.format(model_data_path, model_id), "w") as metadata_file:
@@ -112,8 +112,8 @@ def test_get_factor(tmpdir):
     model_data_path = str(tmpdir.mkdir('model_data'))
     coefs_path, account_id_mapper_path, pid_mapper_path = generate_model_paths(model_data_path)
 
-    terrain_model = Terrain(coefs_path=coefs_path, file_format='parquet', account_id_mapper_path=account_id_mapper_path,
-                            pid_mapper_path=pid_mapper_path)
+    terrain_model = Terrain(coef_table=coefs_path, file_format='parquet', account_id_mapper=account_id_mapper_path,
+                            pid_mapper=pid_mapper_path)
 
     df = generate_predict_df()
     factor = terrain_model._get_factor(df)
