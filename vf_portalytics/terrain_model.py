@@ -23,10 +23,10 @@ class Terrain(BaseEstimator):
 
     def __init__(
         self,
-        account_id_mapper_path,
-        coefs_path,
+        account_id_mapper,
+        coef_table,
         file_format,
-        pid_mapper_path,
+        pid_mapper,
         account_id_col=config.ACCOUNT_ID_COL,
         baseline_col=config.BASELINE_COL,
         customer_col=config.CUSTOMER_COL,
@@ -39,11 +39,11 @@ class Terrain(BaseEstimator):
         """Initialize Terrain model.
 
         Args:
-            account_id_mapper_path (str): Path to account id mapper.
-            coefs_path (str): Path to coefficient data.
+            account_id_mapper (str): Path to account id mapper.
+            coef_table (str): Path to coefficient data.
             file_format (str): File format of baseline data. Should be one of "parquet",
                 "csv", or "json" or a ValueError is raised.
-            pid_mapper_path (str): Path to product id mapper.
+            pid_mapper (str): Path to product id mapper.
             account_id_col (str, optional): Name of account id column in VF call data.
             baseline_col (str, optional): Name of baseline column in VF call data.
                 Defaults to config.baseline_col.
@@ -61,9 +61,9 @@ class Terrain(BaseEstimator):
         """
         if file_format not in ["parquet", "csv", "json"]:
             raise ValueError("file_format must be one of 'parquet', 'csv', or 'json'")
-        self.coef_table = _get_dataframe(file_format, coefs_path)
-        self.account_id_mapper = _get_dataframe(file_format, account_id_mapper_path)
-        self.pid_mapper = _get_dataframe(file_format, pid_mapper_path)
+        self.coef_table = _get_dataframe(file_format, coef_table)
+        self.account_id_mapper = _get_dataframe(file_format, account_id_mapper)
+        self.pid_mapper = _get_dataframe(file_format, pid_mapper)
         self.account_id_col = account_id_col
         self.baseline_col = baseline_col
         self.customer_col = customer_col
@@ -72,6 +72,7 @@ class Terrain(BaseEstimator):
         self.model_transforms = model_transforms
         self.promo_coefs = promo_coefs
         self.promo_features = promo_features
+        self.file_format = file_format
 
     def fit(self, X, y=None):
         """Fit Terrain model.
