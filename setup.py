@@ -48,6 +48,7 @@ setuptools.setup(
     pbr=True,
     description='A consistent interface for creating Machine Learning Models compatible with VisualFabriq environment',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Christos Tselas',
     author_email='ctselas@visualfabriq.com',
     maintainer='DataFlow Domain',
